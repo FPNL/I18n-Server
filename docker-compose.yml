@@ -1,0 +1,74 @@
+version: "3.7"
+
+volumes:
+#     redis:
+    mysql:
+#     proxy:
+#     app:
+
+services:
+
+#     redis:
+#         image: redis:alpine
+#         container_name: redis
+#         volumes:
+#             - redis:/data
+#         ports:
+#             - "6379"
+
+    mysql:
+        image: mysql:5
+        container_name: mysql
+        command: --default-authentication-plugin=mysql_native_password
+        volumes:
+            - mysql:/var/lib/mysql
+        environment:
+            - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+            - MYSQL_USER=${MYSQL_USER:-root}
+            - MYSQL_PASSWORD=${MYSQL_PASSWORD:-root}
+            - MYSQL_DATABASE=${MYSQL_DATABASE:-i18n_users}
+        ports:
+            - "3306:3306"
+    adminer:
+        image: adminer
+        container_name: adminer
+        environment:
+            - ADMINER_PLUGINS=${ADMINER_PLUGINS-}
+            - ADMINER_DESIGN=${ADMINER_DESIGN:-flat}
+            - ADMINER_DEFAULT_SERVER=${ADMINER_DEFAULT_SERVER-mysql}
+            - VIRTUAL_HOST=adminer.test
+        ports:
+            - "8080:8080"
+#     adminer:
+#         image: adminer
+#         container_name: adminer
+#         environment:
+#             - ADMINER_PLUGINS=${ADMINER_PLUGINS-}
+#             - ADMINER_DESIGN=${ADMINER_DESIGN:-flat}
+#             - ADMINER_DEFAULT_SERVER=${ADMINER_DEFAULT_SERVER-mysql}
+#             - VIRTUAL_HOST=adminer.test
+#         ports:
+#             - "8080"
+
+#     nginx-proxy:
+#         image: jwilder/nginx-proxy
+#         container_name: nginx-proxy
+#         ports:
+#             - "80:80"
+#             - "443:443"
+#         volumes:
+#             # - ./nginx/certs:/etc/nginx/certs
+#             # - ./nginx/dhparam:/etc/nginx/dhparam
+#             - /var/run/docker.sock:/tmp/docker.sock:ro
+#     devenv:
+#         build: .
+#         image: devenv
+#         container_name: devenv
+#         volumes:
+#             - app:/www
+#             - ~/.ssh:/root/.ssh
+#         ports:
+#             - "8888"
+#         environment:
+#             - SERVER_ROOT=/www/public
+#             - VIRTUAL_HOST=sp.test, *.sp.test
