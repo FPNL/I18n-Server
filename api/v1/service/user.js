@@ -1,41 +1,70 @@
-// 不改變 result 但是要確認 http code
+const { HttpStatus, HttpStatusMessage } = require('../../../package/e');
+const Validator = require('express-validator');
 
 const {user: UserModel} = require('../model');
-const HttpStatus = require('http-status-codes')
 
 async function getDataFromModel(modelFn, data) {
-    let status;
-
     try {
-        status = HttpStatus.OK;
-
-        const result = await modelFn(data);
-        return { status, result };
+        return { result: await modelFn(data) };
     } catch (e) {
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
+        console.error(" ＝＝＝ getDataFromModel 錯誤 ＝＝＝")
+        let status = HttpStatus.INTERNAL_SERVER_ERROR;
 
         if (e.name === 'SequelizeValidationError') {
-            status = HttpStatus.BAD_REQUEST
+            // TODO 低 紀錄錯誤
+        } else if (e.name === 'SequelizeUniqueConstraintError') {
+            // TODO 低 紀錄錯誤
         }
+            // TODO 低 紀錄錯誤
 
-        return { status };
+        throw status;
     }
 }
 
 async function checkUserExist(data) {
-    let { status, result } = await getDataFromModel(UserModel.countUsers, data);
-
-    if(result < 1) {
-        status = HttpStatus.BAD_REQUEST;
-    } else if (result > 1) {
-        status = HttpStatus.INTERNAL_SERVER_ERROR;
-    }
-
-    return { status, result };
+    const { result } = await getDataFromModel(UserModel.findUser, data);
+    return !!result;
 }
 
-function register(data) {
-    return getDataFromModel(UserModel.createUser, data);
+async function createUserData(data) {
+    const { result } = await getDataFromModel(UserModel.createUser, data);
+    return !!result;
 }
 
-module.exports = { checkUserExist, register }
+async function loginValidation(req) {
+     await accountValidation(req);
+     await passwordValidation(req);
+
+    return validationErrorHandler(req);
+}
+
+async function registerValidation(req) {
+    await accountValidation(req);
+    await passwordValidation(req);
+    await nicknameValidation(req);
+
+    return validationErrorHandler(req);
+}
+
+function accountValidation(req) {
+    const accountCheck = Validator.check('account').isEmail();
+    return accountCheck( req, null, () => {});
+}
+
+function passwordValidation(req) {
+    const passwordCheck = Validator.check('password').isLength({min: 0, max: 100}).isAlphanumeric();
+    return passwordCheck( req, null, () => {});
+}
+
+function nicknameValidation(req) {
+    const nicknameCheck = Validator.check('nickname').isLength({min: 0, max: 50}).isAlpha();
+    return nicknameCheck(req, null, () => {})
+}
+
+async function validationErrorHandler(req) {
+    const errors = await Validator.validationResult(req);
+    !errors.isEmpty() && console.log("資料驗證錯誤", errors);
+    return errors.isEmpty();
+}
+
+module.exports = { checkUserExist, createUserData, loginValidation, registerValidation }

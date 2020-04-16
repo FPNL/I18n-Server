@@ -1,32 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const HttpStatus = require('http-status-codes');
 const { user: UserController } = require('../controller')
+const { HttpStatus, HttpStatusMessage } = require('../../../package/e');
 
-/* GET users listing. */
 router.post('/login', async (req, res, next) => {
-  // service return HttpStatus and result;
-  // router -> controller -> service -> model
-  const reqData = req.body;
-
-  let responseData = await UserController.login(reqData);
-
-  let message = HttpStatus.getStatusText(responseData.status);
-  res
-      .status(responseData.status)
-      .json({ result: responseData.result, message});
+  const responseData = await UserController.loginHandler(req);
+  response(res, responseData);
 });
 
-router.post('/register', (req, res, next) => {
-  // service return HttpStatus and result;
-  const reqData = req.body;
+router.post('/register', async (req, res, next) => {
+  const responseData = await UserController.registerHandler(req);
+  response(res, responseData);
+})
 
-  let responseData = UserController.register(reqData);
+function response(res, responseData) {
+  const message = HttpStatusMessage.get(responseData.status);
 
-  let message = HttpStatus.getStatusText(responseData.status);
+  if(responseData.status > 600) {
+    responseData.status = 400;
+  }
+
   res
       .status(responseData.status)
-      .json({ result: responseData.result, message})
-})
+      .json({ result: responseData.result, message });
+
+}
 
 module.exports = router;

@@ -24,11 +24,11 @@ const User = database.sequelize.define('user', {
 })
 
 const countUsers = (data) => {
-    return User.count({ where: data });
+    return User.count({ where: {account: data.account} });
 }
 
 const findUser = (data) => {
-    return User.findOne({where: data});
+    return User.findOne({where: { account: data.account }});
 }
 
 const createUser = (data) => {
