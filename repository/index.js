@@ -1,6 +1,8 @@
-const sequelize = require('./sequelize')
+const sequelize = require('./sequelize');
+const mongoose = require('./mongoose');
+const mongo = require('./mongo')
 
-module.exports = sequelize
+module.exports = { sequelize, mongoose, mongo };
 
 // module.exports.sequelize = sequelize.sequelize
 

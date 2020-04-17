@@ -1,5 +1,4 @@
-
-
+const language = require('./language');
 const user = require('./user');
 
-module.exports = { user }
+module.exports = { user, language }

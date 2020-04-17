@@ -1,3 +1,4 @@
-const user = require('./user');
+const userController = require('./user');
+const languageController = require('./language');
 
-module.exports = { user }
+module.exports = { userController, languageController };

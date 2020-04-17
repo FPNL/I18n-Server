@@ -1,29 +1,16 @@
 const express = require('express');
 const router = express.Router();
-const { user: UserController } = require('../controller')
-const { HttpStatus, HttpStatusMessage } = require('../../../package/e');
+const { userController } = require('../controller');
+const util = require('../util');
 
 router.post('/login', async (req, res, next) => {
-  const responseData = await UserController.loginHandler(req);
-  response(res, responseData);
+  const responseData = await userController.loginHandler(req);
+  util.routerResponseFormatter(res, responseData);
 });
 
 router.post('/register', async (req, res, next) => {
-  const responseData = await UserController.registerHandler(req);
-  response(res, responseData);
+  const responseData = await userController.registerHandler(req);
+  util.routerResponseFormatter(res, responseData);
 })
-
-function response(res, responseData) {
-  const message = HttpStatusMessage.get(responseData.status);
-
-  if(responseData.status > 600) {
-    responseData.status = 400;
-  }
-
-  res
-      .status(responseData.status)
-      .json({ result: responseData.result, message });
-
-}
 
 module.exports = router;

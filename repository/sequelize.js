@@ -23,10 +23,10 @@ const sequelizeConnectionTest = () => {
     sequelize
         .authenticate()
         .then(() => {
-            console.log('資料庫連線成功...');
+            console.log('Sequelize 連線成功...');
         })
         .catch(err => {
-            console.error('資料庫連接失敗:', err);
+            console.error('Sequelize 連接失敗:', err);
         });
 }
 

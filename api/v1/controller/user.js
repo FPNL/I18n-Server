@@ -5,7 +5,7 @@ const {user: UserService} = require('../service');
 
 
 async function loginHandler(req) {
-    // 驗證 -> 符合格式 -> 確認資料存在 -> 成功則發送 cookie 或 socket 保持連線
+    // 驗證 -> 符合格式 -> 確認資料存在 -> 確認密碼 -> 成功則發送 cookie 或 socket 保持連線
     // 預設最終結果都正確 result true, status 200
 
     // let invalidResponse = { result: false, status: HttpStatus.BAD_REQUEST };
@@ -24,6 +24,9 @@ async function loginHandler(req) {
         if(!await UserService.checkUserExist(reqData)) {
             return { result: false, status: HttpStatus.ERROR_NOT_EXIST_USER };
         }
+
+        // TODO 高 確認密碼
+        // UserService.checkUserPassword()
 
         // TODO 低 紀錄 cookie 保持登入
         // if( !CookieRecord(?result) ) {

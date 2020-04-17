@@ -6,5 +6,7 @@ module.exports = new Map([
     [code.INTERNAL_SERVER_ERROR, '伺服器錯誤'],
 
     [code.ERROR_NOT_EXIST_USER, '使用者不存在'],
-    [code.ERROR_ALREADY_EXIST_USER, '使用者已存在']
+    [code.ERROR_ALREADY_EXIST_USER, '使用者已存在'],
+
+    [code.ERROR_ALREADY_EXIST_WORD, '文字重複']
 ]);

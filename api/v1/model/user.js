@@ -1,7 +1,7 @@
 const database = require('../../../repository');
 const Sequelize = require('sequelize');
 
-const User = database.sequelize.define('user', {
+const User = database.sequelize.sequelize.define('user', {
     account: {
         type: Sequelize.STRING,
         allowNull: false

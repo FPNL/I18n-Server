@@ -9,7 +9,9 @@ const database = require('./repository');
 
 const app = express();
 
-database.sequelizeConnectionTest()
+database.sequelize.sequelizeConnectionTest()
+// database.mongoose.mongooseConnectionTest();
+// database.mongo.run().catch(console.dir);
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
