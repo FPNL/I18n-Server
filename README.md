@@ -33,7 +33,13 @@ http status code 在 200~600 之間，
 
 通常 error code 都是客端錯誤，所以回應時要把 status 算是 http code 的 400。
 
+### 命名規則
+
+router 銜接父類命稱， ex: lang/search，而不用 lang/langSearch
+controller 字尾是 Handler，命名方向可以模仿 router 命名
+service 名稱要詳盡，checkReqData 讓人不懂是要檢查什麼， checkLanguageColumnIncludeReqData
+model 要有 ＣＲＵＤ 關鍵字
+
 ### 錯誤紀錄
 
 待增...
-

@@ -10,7 +10,7 @@ const database = require('./repository');
 const app = express();
 
 database.sequelize.sequelizeConnectionTest()
-// database.mongoose.mongooseConnectionTest();
+database.mongoose.mongooseConnectionTest();
 // database.mongo.run().catch(console.dir);
 
 // view engine setup

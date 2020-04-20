@@ -2,7 +2,8 @@ const Config = require('../config');
 
 const mongoose = require('mongoose');
 
-mongoose.connect(Config.MONGO_DB_URI, {useNewUrlParser: true,  useUnifiedTopology: true });
+mongoose.connect(Config.MONGO_DB_URI + Config.MONGO_DB_DATABASE + '?retryWrites=true&w=majority',
+    { useNewUrlParser: true, useUnifiedTopology: true });
 
 
 function mongooseConnectionTest() {

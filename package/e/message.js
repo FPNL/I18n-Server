@@ -2,11 +2,17 @@ const code = require('./code');
 
 module.exports = new Map([
     [code.OK, '成功'],
+    [code.NO_DATA, '沒有資料'],
     [code.INVALID_PARAMS, '參數錯誤'],
     [code.INTERNAL_SERVER_ERROR, '伺服器錯誤'],
 
     [code.ERROR_NOT_EXIST_USER, '使用者不存在'],
     [code.ERROR_ALREADY_EXIST_USER, '使用者已存在'],
 
-    [code.ERROR_ALREADY_EXIST_WORD, '文字重複']
+    [code.ERROR_ALREADY_EXIST_WORD, '文字重複'],
+    [code.ERROR_ALREADY_EXIST_WORD, '文字不存在'],
+    [code.ERROR_LANG_COLUMN_OVERFLOW, '語言欄不符合'],
+    [code.ERROR_ALREADY_EXIST_LANGUAGE, '語言已經建構過了'],
+    [code.ERROR_NAME_FORMAT, 'name 格式錯誤'],
+    [code.ERROR_LANG_COLUMN_FORMAT, 'lang 格式錯誤']
 ]);
