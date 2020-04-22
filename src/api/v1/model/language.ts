@@ -1,4 +1,8 @@
+import Mongoose = require('mongoose');
+
 import Database from '../../../repository';
+import { LangModelType } from './model';
+
 const mongoose = Database.mongoose.Mongoose;
 const Schema = mongoose.Schema;
 
@@ -9,25 +13,33 @@ const LangConfigModel = initLangConfigModel(tableNameConfig);
 const LangModel = initLanguageModel(tableNameMain);
 
 function initLangConfigModel(tableName_config: string) {
-    const LangConfigModel = mongoose.model(tableName_config, new Schema({ langs: Array }));
+    const schema = { langs: Array };
+    const LangConfigModel = mongoose.model<LangModelType.LangConfigModel>(tableName_config, new Schema(schema));
     return LangConfigModel;
 }
 
-async function initLanguageModel(tableName_main: string) {
+function initLanguageModel(tableName_main: string) {
     const schema = {
-        name: { type: String, unique: true }
+        name: { type: String, unique: true },
+        content: { type: Schema.Types.Mixed }
     };
-    const result = await LangConfigModel.findOne({}, 'langs', (err, options) => {});
 
-    if (result) {
-        // @ts-ignore
-        const langs: Array<any> = Array.from(new Set(result.langs));
-        for (let index = 0; index < langs.length; index++) {
-            const element = langs[index];
-            schema[element] = String;
-        }
-    }
-    return mongoose.model(tableName_main, new Schema(schema));
+    // const result = await LangConfigModel.findOne({}, '-_id langs');
+    // if (result) {
+    //     // @ts-ignore
+    //     const langs: Array<any> = Array.from(new Set(result.langs));
+    //     for (let index = 0; index < langs.length; index++) {
+    //         const element = langs[index];
+    //         schema[element] = String;
+    //     }
+    // }
+
+    const LangModel = mongoose.model<LangModelType.LangModel>(tableName_main, new Schema(schema));
+    return LangModel;
+}
+
+
+function TEST() {
 }
 
 // FIXME 以下
@@ -39,7 +51,30 @@ async function initLanguageModel(tableName_main: string) {
 //
 
 function readLanguageList() {
-    return LangConfigModel.findOne({}, '-_id langs');
+    const result = LangConfigModel.findOne({}, '-_id langs')
+    return result;
+}
+
+
+function readWordsData(data, params: { limit: number, skip: number }) {
+    let { limit, skip } = params;
+    if (limit > 50) {
+        limit = 50;
+    }
+    return LangModel.find({}, '-_id', { skip, limit });
+}
+
+function createLanguageColumn(data: { lang: string; }) {
+    return LangConfigModel.findOneAndUpdate({}, { $addToSet: { langs: data.lang } });
+}
+
+
+function readWordExist(data) {
+
+}
+
+function readWordsRepeat(data: Array<string>) {
+    return LangModel.find({ name: { $in: data } }, '-_id name');
 }
 
 // function insertWord(data) {
@@ -57,31 +92,8 @@ function readLanguageList() {
 // // }
 
 
-// function readWordExist(data) {
-//     const sequelize = database.sequelize.sequelize;
-//     const columnName = 'name';
 
-//     const query = `SELECT EXISTS(SELECT * FROM ${tableName} WHERE ${columnName}="${data.name}");`;
 
-//     return sequelize.query(query, { type: sequelize.QueryTypes.SELECT});
-// }
-
-// function readWordData(data = {}) {
-//     const limit = data.limit || 50;
-
-//     const query = `SELECT * FROM ${tableName} LIMIT ${limit};`;
-
-//     return sequelize.query(query, { type: sequelize.QueryTypes.SELECT });
-// }
-
-// function createLanguageColumn(data = {}) {
-//     const columnName = data.lang || 'test';
-
-//     const query = `ALTER TABLE ${tableName} ADD \`${columnName}\` tinytext COLLATE 'utf8mb4_unicode_ci' NOT NULL;`
-
-//     return sequelize.query(query, { type: sequelize.QueryTypes.RAW})
-
-// }
 
 // async function updateWords() {
 //     // INSERT INTO tableName (columns...)
@@ -93,10 +105,12 @@ function readLanguageList() {
 // }
 
 export default {
+    initLanguageModel,
+    readLanguageList,
+    readWordsData,
+    createLanguageColumn,
+    readWordsRepeat,
+    TEST,
     // readWordExist,
     // insertWord,
-    // readWordData,
-    // createLanguageColumn,
-    readLanguageList,
-    initLanguageModel
 };

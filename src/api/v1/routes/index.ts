@@ -1,7 +1,9 @@
-import express from 'express';
+import Express = require('express');
+
 import User from './user';
 import Lang from './language';
-const Router_v1 = express.Router();
+
+const Router_v1 = Express.Router();
 
 /* GET home page. */
 Router_v1.use('/user', User);

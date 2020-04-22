@@ -13,6 +13,12 @@ export default new Map([
     [code.ERROR_ALREADY_EXIST_WORD, '文字不存在'],
     [code.ERROR_LANG_COLUMN_OVERFLOW, '語言欄不符合'],
     [code.ERROR_ALREADY_EXIST_LANGUAGE, '語言已經建構過了'],
+    [code.ERROR_DATA_FORMAT, 'data 格式錯誤'],
     [code.ERROR_NAME_FORMAT, 'name 格式錯誤'],
-    [code.ERROR_LANG_COLUMN_FORMAT, 'lang 格式錯誤']
+    [code.ERROR_CONTENT_FORMAT, 'content 格式錯誤'],
+    [code.ERROR_NICKNAME_FORMAT, 'nickname 格式錯誤'],
+    [code.ERROR_ACCOUNT_FORMAT, 'account 格式錯誤'],
+    [code.ERROR_PASSWORD_FORMAT, 'password 格式錯誤'],
+    [code.ERROR_LANG_COLUMN_FORMAT, 'lang 格式錯誤'],
+    [code.WARNING_REPEAT_WORD, '警告 name 有重複情況'],
 ]);

@@ -4,12 +4,12 @@
  * Module dependencies.
  */
 
+import debug = require('debug');
+import http = require('http');
+
 import app from '../src/app';
-import debug from 'debug';
+
 debug('i18n-server:server');
-
-import http from 'http';
-
 /**
  * Get port from environment and store in Express.
  */

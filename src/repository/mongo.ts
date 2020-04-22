@@ -1,8 +1,8 @@
-import { MongoClient } from 'mongodb';
-import Config from '../config';
-// Replace the following with your Atlas connection string
+import Mongodb = require('mongodb');
 
-const client = new MongoClient(Config.MONGO_DB_URI, {useNewUrlParser: true,  useUnifiedTopology: true });
+import Config from '../config';
+
+const client = new Mongodb.MongoClient(Config.MONGO_DB_URI, {useNewUrlParser: true,  useUnifiedTopology: true });
 
 async function run() {
     try {

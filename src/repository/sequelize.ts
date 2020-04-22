@@ -1,9 +1,10 @@
-import { Sequelize } from 'sequelize';
+import Sequelize = require('sequelize');
+
 import Config from '../config';
 
 // let sequelize = {};
 
-const sequelize = new Sequelize(Config.DATABASE, Config.USERNAME, Config.PASSWORD, {
+const sequelize = new Sequelize.Sequelize(Config.DATABASE, Config.USERNAME, Config.PASSWORD, {
     host: Config.HOST,
     dialect: Config.DATABASE_TYPE,
     // The `timestamps` field specify whether or not the `createdAt` and `updatedAt` fields will be created.

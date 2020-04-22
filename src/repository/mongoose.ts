@@ -1,5 +1,6 @@
+import Mongoose = require('mongoose');
+
 import Config from '../config';
-import Mongoose from 'mongoose';
 
 console.log(Config.MONGO_DB_URI + Config.MONGO_DB_DATABASE);
 

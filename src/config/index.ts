@@ -1,6 +1,6 @@
+import Dotenv = require('dotenv');
+import Path = require('path');
 
-import Dotenv from 'dotenv';
-import Path from 'path';
 import { Config } from './config';
 
 Dotenv.config({ path: Path.join('.env') });

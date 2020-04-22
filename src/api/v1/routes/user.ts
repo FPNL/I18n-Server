@@ -1,4 +1,4 @@
-import Express from 'express';
+import Express = require('express');
 
 // import { userController } from '../controller';
 import Controller from '../controller';

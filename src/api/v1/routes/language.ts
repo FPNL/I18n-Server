@@ -1,4 +1,5 @@
-import Express from 'express';
+import Express = require('express');
+
 // import { languageController } from '../controller';
 import Controller from '../controller';
 import Util from '../util';
@@ -7,35 +8,40 @@ const router = Express.Router();
 
 router.get('/list', async (req, res, next): Promise<void> => {
     const responseData = await Controller.Lang.getLanguageListHandler(req);
-
     Util.routerResponseFormatter(res, responseData);
 }, (req, res): void => {
     // TODO Redis store
     // const RedisStore();
 });
 
-// router.get('/content', async (req, res, next): Promise<void> => {
-//     const responseData = await Controller.Lang.readWordContentHandler(req);
-//     Util.routerResponseFormatter(res, responseData);
-//     next();
-// }, (req, res): void => {
-//     // TODO Redis store
-//     // const RedisStore();
-// });
+router.get('/content', async (req, res, next): Promise<void> => {
+    const responseData = await Controller.Lang.getWordsContentHandler(req);
+    Util.routerResponseFormatter(res, responseData);
+}, (req, res): void => {
+    // TODO Redis store
+    // const RedisStore();
+});
 
-// router.post('/addLanguage', async (req, res, next): Promise<void> => {
-//     const responseData = await Controller.Lang.addLanguageHandler(req);
-//     Util.routerResponseFormatter(res, responseData);
-// })
+router.post('/addLanguage', async (req, res, next): Promise<void> => {
+    const responseData = await Controller.Lang.addLanguageHandler(req);
+    Util.routerResponseFormatter(res, responseData);
+}, (req, res) => {
+    // TODO Redis Store
+    // const RedisStore()
+})
 
-// router.post('/createWord', async (req, res, next): Promise<void> => {
-//     const responseData = await Controller.Lang.createWordHandler(req);
-//     Util.routerResponseFormatter(res, responseData);
-//     next();
-// }, (req, res): void => {
-//     // TODO Redis store
-//     // const RedisStore();
-// })
+// 目前後端先以創建多組詞語為主，但前端使用上先以 創建單一為原則。
+router.post('/addWords', async (req, res, next): Promise<void> => {
+    const responseData = await Controller.Lang.addWordsHandler(req);
+    Util.routerResponseFormatter(res, responseData);
+}, (req, res): void => {
+    // TODO Redis store
+    // const RedisStore();
+});
+
+router.post('/alterWords', async (req, res, next): Promise<void> => {
+    res.send("建造中．．．")
+})
 
 // router.delete('/deleteLanguage', async (req, res, next): Promise<void> => {
 //     next()

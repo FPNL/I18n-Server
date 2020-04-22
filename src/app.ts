@@ -1,15 +1,14 @@
 // 套件
-import CreateError from 'http-errors';
-import Express from 'express';
-import CookieParser from 'cookie-parser';
-import Logger from 'morgan';
-import Path from 'path';
+import CreateError = require('http-errors');
+import Express = require('express');
+import CookieParser  = require( 'cookie-parser');
+import Logger  = require( 'morgan');
+import Path  = require( 'path');
 // 模組
 import ApiRouter from './api/v1';
 import Database from './repository';
 
 const app = Express();
-
 
 Database.sequelize.sequelizeConnectionTest()
 Database.mongoose.mongooseConnectionTest();

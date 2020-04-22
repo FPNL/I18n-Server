@@ -1,16 +1,18 @@
 import ErrorPackage from '../../../package/e';
 import Service from '../service';
+import { Controller } from './controller';
 
 
-async function loginHandler(req) {
+async function loginHandler(req): Promise<Controller.typicalResponse> {
     // 驗證 -> 符合格式 -> 確認資料存在 -> 確認密碼 -> 成功則發送 cookie 或 socket 保持連線
     // 預設最終結果都正確 result true, status 200
 
     // let invalidResponse = { result: false, status: HttpStatus.BAD_REQUEST };
     try {
         // 資料驗證： 帳號需是 email, 密碼只能 0-1, a-Z
-        if(!await Service.User.loginValidation(req)) {
-            return { result: false, status: ErrorPackage.HttpStatus.INVALID_PARAMS };
+        let [error, validationResult] = await Service.User.loginValidation(req);
+        if(error) {
+            return { result: false, status: validationResult };
         }
 
         // TODO 中 資料格式化

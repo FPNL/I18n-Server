@@ -1,8 +1,8 @@
-import express from 'express';
+import Express = require('express');
 
 import Router_v1 from './routes';
 
-const SubApp_v1 = express();
+const SubApp_v1 = Express();
 
 SubApp_v1.use('/v1', Router_v1);
 

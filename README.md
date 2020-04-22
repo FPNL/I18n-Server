@@ -1,3 +1,7 @@
+### 引用規則
+使用 lib 盡量用 import package = require('third-party-lib');
+引用內部 import insideVariable from '../path/to/folder';
+
 ### API 流程
 
 router -> controller -> service -> model
@@ -22,16 +26,39 @@ router -> controller -> service -> model
 
 錯誤應該要發生在 service 與 model 這兩塊，
 service 捕捉 (catch) 到錯誤 (error) 後，利用 throw error 方式 告知 controller 錯誤發生，
+順便再告知 error code，
 controller 則會回應伺服器錯誤，因為這代表流程有錯，或是程式碼有錯誤。
-
 
 ### Http Code and Error Code
 
 為了方便表達 message，原本使用的套件 http status code 改用了自製的號碼表，檔案在 package/e，
 http status code 在 200~600 之間，
-自訂的 error code 則是 10000 以上。
+自訂的 error code 則是 1000 以上。
 
 通常 error code 都是客端錯誤，所以回應時要把 status 算是 http code 的 400。
+
+[文章摘要](https://www.itread01.com/content/1549447927.html) ：
+- 定義錯誤提示級別，1 為服務端返回提示、2 為不提示、3 隱藏性賣萌提示。
+- 定義具體的錯誤模組，登入相關 / 訂單相關 / 產品相關
+- 具體錯誤編號，自增即可，一個專案 9999 種錯誤應該夠用；
+
+我做法是 :
+後端做一套，前端自己在做一套， 訊息主要是給 前端開發人員(我自己) 看的， 可以參考該文章錯誤模組。
+
+定義為：
+- 第 1 位 ： API 分類
+- 第 2~3 位： 模組錯誤
+    1. controller
+    2. model
+    3. routes
+    4. service
+    5. util
+    6. config
+    7. repository
+    8. public
+    9. app
+- 第 4 位 開始： non-zero-filled 的寫法，如： 1001, 10011
+
 
 ### 命名規則
 

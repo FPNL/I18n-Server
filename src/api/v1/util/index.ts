@@ -1,6 +1,7 @@
+import Validator = require('express-validator');
+import Express = require('express');
+
 import ErrorPackage from '../../../package/e';
-import Validator from 'express-validator';
-import Express from 'express';
 import { Controller } from '../controller/controller';
 
 function routerResponseFormatter(res: Express.Response, responseData: Controller.typicalResponse): void {
@@ -35,10 +36,15 @@ async function getDataFromModel(modelFn: Function, data: any): Promise<{ result:
     }
 }
 
-async function validationErrorHandler(req: Express.Request): Promise<boolean> {
+async function validationErrorHandler(req: Express.Request): Promise<[boolean, string]> {
     const errors = await Validator.validationResult(req);
-    !errors.isEmpty() && console.log("資料驗證錯誤", errors);
-    return errors.isEmpty();
+    let result = '';
+    if ( !errors.isEmpty() ) {
+        console.log("資料驗證錯誤", errors);
+        result = Object.keys(errors.mapped())[0];
+    }
+
+    return [errors.isEmpty(), result]
 }
 
 export default { routerResponseFormatter, getDataFromModel, validationErrorHandler};
