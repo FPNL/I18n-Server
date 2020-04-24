@@ -75,22 +75,27 @@ async function checkWordsValidation(req: Express.Request): Promise<[boolean, num
  * n = content.length * data.length;
  * m = langs.length;
  */
-async function checkWordsDataMatchLangs(reqBodyData: Service.wordsFormat): Promise<boolean> {
+async function checkWordsDataMatchLangs(reqBodyData: Service.wordsFormat): Promise<[boolean, any]> {
     const result = await Model.Lang.readLanguageList();
 
     if (result && result.langs) {
         const { langs } = result;
-        return reqBodyData.data.every(value => {
+        let isNotMatchData: string|undefined = "";
+        const everyDataMatched = reqBodyData.data.every(value => {
             const reqKeys = Object.keys(value.content);
-            return reqKeys.every(column => langs.includes(column));
+            isNotMatchData = reqKeys.find(column => !langs.includes(column));
+
+            return !isNotMatchData;
         });
+
+        return [!everyDataMatched, isNotMatchData ?? ""];
     }
-    return false;
+    return [true, '尚未建立語言'];
 }
 
-// TODO 有兩種 repeat 一種是內部重複 另種是 跟資料庫重複
+// 有兩種 repeat 一種是內部重複 另種是 跟資料庫重複
 
-function checkReqBodyDataRepeat(reqBodyData: Service.wordsFormat): [boolean, Array<string>] {
+function checkRepeatInsideReqBodyData(reqBodyData: Service.wordsFormat): [boolean, Array<string>] {
     const namesArr = reqBodyData.data.map(value => value.name);
     const findDuplicates = (arr: string[]) => arr.filter((item, index) => arr.indexOf(item) !== index)
     const repeatNamesArr = [...new Set(findDuplicates(namesArr))];
@@ -105,10 +110,11 @@ async function checkWordsExistInDB(reqBodyData: Service.wordsFormat): Promise<[b
 }
 
 async function checkWordsNotExistInDB(reqBodyData: Service.wordsFormat): Promise<[boolean, Array<string>]> {
-    const namesArr = reqBodyData.data.map(value => value.name);
-    const result = await Model.Lang.readWordsNotInName(namesArr);
+    const namesArr = reqBodyData.data.map(value => value.name);[1, 3];
+    const result = await Model.Lang.readWordsInName(namesArr);[1];
     const repeatNamesArr = result.map(v => v.name);
-    return [result.length > 0, repeatNamesArr];
+    const wordNotInDB = namesArr.filter(v => !repeatNamesArr.includes(v));
+    return [wordNotInDB.length > 0, wordNotInDB];
 }
 
 async function removeRepeatWordsFromReqBodyData(reqBodyData: Service.wordsFormat, repeatData: any[]): Promise<boolean> {
@@ -198,10 +204,11 @@ export default {
     addOneLangToDB,
     checkWordsValidation,
     checkWordsDataMatchLangs,
-    checkReqBodyDataRepeat,
+    checkRepeatInsideReqBodyData,
     checkWordsExistInDB,
     checkWordsNotExistInDB,
     removeRepeatWordsFromReqBodyData,
     insertWordsIntoDB,
+    updateWordsIntoDB,
     // checkWordDataMatchLangColumn,
 };

@@ -79,11 +79,13 @@ async function addWordsHandler(req: Express.Request): Promise<Controller.typical
 
         // 確認是否有符合語言名單 若是 input { name, en, cht } 可是lang list 只有 { name, en }，
         // 是不是代表客端錯誤或是增加語言欄位的功能發生錯誤？
-        if (!await Service.Lang.checkWordsDataMatchLangs(reqBodyData)) {
-            return { status: ErrorPackage.HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: false };
+        let [errorNotMatch, wrongLang] = await Service.Lang.checkWordsDataMatchLangs(reqBodyData);
+
+        if (errorNotMatch) {
+            return { status: ErrorPackage.HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: wrongLang };
         }
 
-        const [isInsideDataRepeat, repeatDataInReqBody] = Service.Lang.checkReqBodyDataRepeat(reqBodyData);
+        const [isInsideDataRepeat, repeatDataInReqBody] = Service.Lang.checkRepeatInsideReqBodyData(reqBodyData);
         if (isInsideDataRepeat) {
             return { status: ErrorPackage.HttpStatus.WARNING_REPEAT_WORD, result: repeatDataInReqBody }
         }
@@ -124,22 +126,25 @@ async function alterWordsHandler(req: Express.Request): Promise<Controller.typic
             return { status: validationErrorCode, result: false };
         }
 
-        if (!await Service.Lang.checkWordsDataMatchLangs(reqBodyData)) {
-            return { status: ErrorPackage.HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: false };
+        let [errorNotMatch, wrongLang] = await Service.Lang.checkWordsDataMatchLangs(reqBodyData);
+        if (errorNotMatch) {
+            return { status: ErrorPackage.HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: wrongLang };
         }
 
-        const [isInsideDataRepeat, repeatDataInReqBody] = Service.Lang.checkReqBodyDataRepeat(reqBodyData);
+        const [isInsideDataRepeat, repeatDataInReqBody] = Service.Lang.checkRepeatInsideReqBodyData(reqBodyData);
         if (isInsideDataRepeat) {
             return { status: ErrorPackage.HttpStatus.WARNING_REPEAT_WORD, result: repeatDataInReqBody }
         }
 
         const [isNotExist, ghostData] = await Service.Lang.checkWordsNotExistInDB(reqBodyData);
         if (isNotExist) {
-            return { status: ErrorPackage.HttpStatus.WARNING_REPEAT_WORD, result: ghostData }
+            return { status: ErrorPackage.HttpStatus.ERROR_NOT_EXIST_WORD, result: ghostData }
         }
 
-        await Service.Lang.insertWordsIntoDB(reqBodyData);
-
+        error = await Service.Lang.updateWordsIntoDB(reqBodyData);
+        if (error) {
+            throw ErrorPackage.HttpStatusMessage.get(ErrorPackage.HttpStatus.WARNING_REPEAT_WORD);
+        }
 
     } catch (error) {
         console.error("alterWordsHandler 錯誤 : ", error);
