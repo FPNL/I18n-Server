@@ -111,32 +111,14 @@ function updateWords(data: Array<Service.wordFormat>) {
     }));
     return LangModel.bulkWrite(bulkOps);
 }
-// function insertWord(data) {
 
-//     const dataKeys = Object.keys(data).map(key => `\`${key}\``).join();
-//     const dataValues = Object.values(data).map(value => `'${value}'`).join();
+function deleteWords(data: string[]) {
+    return LangModel.deleteMany({ name: { $in: data } });
+}
 
-//     const query = `INSERT INTO \`${tableName}\` (${dataKeys}) VALUES (${dataValues});`
-//     return sequelize.query(query, { type: sequelize.QueryTypes.INSERT });
-// }
-// //
-// // function insertLanguages(data) {
-// //     const { name, lang1, lang2 } = data[0];
-// //     Mysql.insertMany(data);
-// // }
-
-
-
-
-
-// async function updateWords() {
-//     // INSERT INTO tableName (columns...)
-//     // VALUES
-//     // ('value','value',...),
-//     // ('value','value',...)
-//     // ON DUPLICATE KEY UPDATE
-//     // column=VALUES(column), column2=VALUES(column)
-// }
+function deleteLang(data: string) {
+    return LangConfigModel.findOneAndUpdate({}, { $pull: { langs: data } });
+}
 
 export default {
     TEST,
@@ -148,6 +130,8 @@ export default {
     readWordsNotInName,
     insertWords,
     updateWords,
+    deleteWords,
+    deleteLang
     // readWordExist,
     // insertWord,
 };

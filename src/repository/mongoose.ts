@@ -10,7 +10,8 @@ Mongoose.connect(Config.MONGO_DB_URI + Config.MONGO_DB_DATABASE,
         useNewUrlParser: true,
         useUnifiedTopology: true,
         useCreateIndex: true,
-        authSource: 'admin'
+        authSource: 'admin',
+        useFindAndModify: false
     }
 );
 

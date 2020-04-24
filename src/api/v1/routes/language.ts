@@ -7,7 +7,7 @@ import Util from '../util';
 const router = Express.Router();
 
 router.get('/list', async (req, res, next): Promise<void> => {
-    const responseData = await Controller.Lang.getLanguageListHandler(req);
+    const responseData = await Controller.Lang.getLanguageListHandler();
     Util.routerResponseFormatter(res, responseData);
 }, (req, res): void => {
     // TODO Redis store
@@ -45,13 +45,13 @@ router.post('/alterWords', async (req, res, next): Promise<void> => {
 })
 
 router.delete('/deleteLanguage', async (req, res, next): Promise<void> => {
-    res.send("建造中．．．")
+    const responseData = await Controller.Lang.deleteLangHandler(req);
+    Util.routerResponseFormatter(res, responseData);
 })
 
 router.delete('/deleteWords', async (req, res, next): Promise<void> => {
-    // const responseData = await Controller.Lang.deleteWordHandler(req);
-    // Util.routerResponseFormatter(res, responseData);
-    res.send("尚未建造．．．")
+    const responseData = await Controller.Lang.deleteWordsHandler(req);
+    Util.routerResponseFormatter(res, responseData);
 }, (req, res): void => {
     // TODO Redis Delete
     // const RedisDelete();

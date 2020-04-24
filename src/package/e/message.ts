@@ -13,6 +13,7 @@ export default new Map([
     [code.ERROR_NOT_EXIST_WORD, '文字不存在'],
     [code.ERROR_LANG_COLUMN_OVERFLOW, '語言欄不符合'],
     [code.ERROR_ALREADY_EXIST_LANGUAGE, '語言已經建構過了'],
+    [code.ERROR_NOT_EXIST_LANGUAGE, '語言並未建構過'],
     [code.ERROR_DATA_FORMAT, 'data 格式錯誤'],
     [code.ERROR_NAME_FORMAT, 'name 格式錯誤'],
     [code.ERROR_CONTENT_FORMAT, 'content 格式錯誤'],

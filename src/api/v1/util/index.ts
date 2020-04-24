@@ -40,7 +40,6 @@ async function validationErrorHandler(req: Express.Request): Promise<[boolean, s
     const errors = await Validator.validationResult(req);
     let result = '';
     const isError = !errors.isEmpty()
-
     if ( isError ) {
         console.log("資料驗證錯誤", errors);
         result = Object.keys(errors.mapped())[0];

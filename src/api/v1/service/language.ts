@@ -34,28 +34,40 @@ async function checkLangColumnValidation(req: Express.Request): Promise<[boolean
     return [err, ErrorPackage.HttpStatus.OK];
 }
 
-async function checkLangColumnRepeat(reqBodyData: { lang: string }): Promise<boolean|undefined> {
+async function checkLangHasExist(reqBodyData: { lang: string }): Promise<boolean|undefined> {
     const result = await Model.Lang.readLanguageList();
-    const ifLangHadRepeat = result?.langs.some(value => value === reqBodyData.lang);
-    return ifLangHadRepeat;
+    const ifLangHasExisted = result?.langs.some(value => value === reqBodyData.lang);
+    return ifLangHasExisted;
 }
 
 async function addOneLangToDB(reqBodyData: { lang: string; }) {
     return await Model.Lang.updateLanguageByPushing(reqBodyData);
 }
 
+async function checkNameValidation(req: Express.Request): Promise<[boolean, number]> {
+    const namesCheck = Validator.check('data.*').isAlphanumeric();
+    await namesCheck(req, null, () => { });
+    const [err, result] = await Util.validationErrorHandler(req);
+    if (err) {
+        return [err, ErrorPackage.HttpStatus.ERROR_NAME_FORMAT];
+    }
+    return [err, ErrorPackage.HttpStatus.OK];
+}
+
 async function checkWordsValidation(req: Express.Request): Promise<[boolean, number]> {
     const namesCheck = Validator.check('data.*.name').isAlphanumeric();
-    const contentCheck = Validator.check('data.*.content').custom((value: Service.wordContent): boolean => {
-        for (const lang in value) {
-            if (value.hasOwnProperty(lang) && !lang.match(/^[\w\-]+$/)) {
-                throw new Error(`data.content 的 ${lang} 錯誤，須為 "a-Z", "0-9", "-", "_"`);
+    await namesCheck(req, null, () => { });
+
+    const contentCheck = Validator.check('data.*.content').custom((content: Service.wordContent): boolean => {
+        if (content) {
+            for (const lang in content) {
+                if (content.hasOwnProperty(lang) && !lang.match(/^[\w\-]+$/)) {
+                    throw new Error(`data.content 的 ${lang} 錯誤，須為 "a-Z", "0-9", "-", "_"`);
+                }
             }
         }
         return true;
     });
-
-    await namesCheck(req, null, () => { });
     await contentCheck(req, null, () => { });
 
     const [err, result] = await Util.validationErrorHandler(req);
@@ -80,15 +92,17 @@ async function checkWordsDataMatchLangs(reqBodyData: Service.wordsFormat): Promi
 
     if (result && result.langs) {
         const { langs } = result;
-        let isNotMatchData: string|undefined = "";
-        const everyDataMatched = reqBodyData.data.every(value => {
-            const reqKeys = Object.keys(value.content);
-            isNotMatchData = reqKeys.find(column => !langs.includes(column));
-
-            return !isNotMatchData;
+        let notMatchedData: string|undefined = "";
+        const everyDataMatched = reqBodyData.data.every(eachData => {
+            if (!eachData.hasOwnProperty("content")) {
+                return true;
+            }
+            const reqKeys = Object.keys(eachData.content);
+            notMatchedData = reqKeys.find(column => !langs.includes(column));
+            return !notMatchedData; // 左側為縮寫，完整句子： if (notMatchedData) { return false; } else { return true; }
         });
 
-        return [!everyDataMatched, isNotMatchData ?? ""];
+        return [!everyDataMatched, notMatchedData ?? ""];
     }
     return [true, '尚未建立語言'];
 }
@@ -109,9 +123,10 @@ async function checkWordsExistInDB(reqBodyData: Service.wordsFormat): Promise<[b
     return [result.length > 0, repeatNamesArr];
 }
 
-async function checkWordsNotExistInDB(reqBodyData: Service.wordsFormat): Promise<[boolean, Array<string>]> {
-    const namesArr = reqBodyData.data.map(value => value.name);[1, 3];
-    const result = await Model.Lang.readWordsInName(namesArr);[1];
+async function checkWordsNotExistInDB(reqBodyData: Service.wordsFormat | { data: Array<string> }): Promise<[boolean, Array<string>]> {
+    // @ts-ignore
+    const namesArr = reqBodyData.data.map(value => value.name ?? value);
+    const result = await Model.Lang.readWordsInName(namesArr);
     const repeatNamesArr = result.map(v => v.name);
     const wordNotInDB = namesArr.filter(v => !repeatNamesArr.includes(v));
     return [wordNotInDB.length > 0, wordNotInDB];
@@ -149,49 +164,27 @@ async function updateWordsIntoDB(reqBodyData: Service.wordsFormat): Promise<bool
     }
 }
 
-// // TODO 多重
-// async function wordsValidation(req) {
-//     // reqBodyData should be Array,
-//     // data would be [{name: ""}, {name: ""}, ...] or ["name1", "name2", ...],
-//     const wordsCheck = Validator.check('data').custom(eachData => {
-//         // return (eachData.name || eachData) isAlphanumeric();
-//     });
-//     await wordsCheck(req, null, () => { });
-//     return Util.validationErrorHandler(req);
-// }
+// 返回錯誤 採 go 概念
+async function deleteWordsFromDB(reqBodyData: {data: Array<string>}): Promise<boolean> {
+    const { data } = reqBodyData;
+    try {
+        const { deletedCount } = await Model.Lang.deleteWords(data);
+        return !(deletedCount === data.length);
+    } catch (error) {
+        return false;
+    }
 
+}
 
-// // TODO 多重
-// async function checkWordsExist(reqBodyData) {
-//     // reqBodyData should be Array,
-//     // data would be [{name: ""}, {name: ""}, ...] or ["name1", "name2", ...],
-
-//     // 只要數 select where in 的數量跟 array 的數量有沒有符合
-//     // SELECT COUNT(name)
-//     // FROM languages
-//     // WHERE name IN ('test1','test2','test3');
-//     const [result] = await Model.Lang.readWordExist();
-// }
-
-
-
-// async function checkWordDataMatchLangColumn(reqBodyData) {
-//     const reqKeys = Object.keys(reqBodyData);
-
-//     const [ result ] = await Model.Lang.readLanguageList();
-//     const dbColumns = result.COLUMN_NAME.split(',');
-
-//     return reqKeys.every(column => dbColumns.includes(column));
-// }
-
-// // TODO 多重
-
-// async function insertWordIntoDB(reqBodyData) {
-//     const [ dataId ] = await Model.Lang.insertWord(reqBodyData);
-//     return dataId;
-// }
-
-
+async function deleteLangFromDB(reqBodyData: { lang: string; }): Promise<boolean> {
+    const { lang } = reqBodyData;
+    try {
+        await Model.Lang.deleteLang(lang);
+        return false;
+    } catch (error) {
+        return true;
+    }
+}
 
 
 
@@ -200,7 +193,7 @@ export default {
     getLangList,
     getLimitWordsData,
     checkLangColumnValidation,
-    checkLangColumnRepeat,
+    checkLangHasExist,
     addOneLangToDB,
     checkWordsValidation,
     checkWordsDataMatchLangs,
@@ -210,5 +203,7 @@ export default {
     removeRepeatWordsFromReqBodyData,
     insertWordsIntoDB,
     updateWordsIntoDB,
-    // checkWordDataMatchLangColumn,
+    checkNameValidation,
+    deleteWordsFromDB,
+    deleteLangFromDB
 };
