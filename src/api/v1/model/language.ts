@@ -1,6 +1,6 @@
 import Mongoose = require('mongoose');
 
-import Database from '../../../repository';
+import Database from '../../../database';
 import { LangModelType } from './model';
 import { Service } from '../service/service';
 

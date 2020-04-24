@@ -1,8 +1,8 @@
 import sequelize from './sequelize';
 import mongoose from './mongoose';
 import mongo from './mongo';
-
-export default { sequelize, mongoose, mongo };
+import redis from './redis';
+export default { sequelize, mongoose, mongo, redis };
 
 // module.exports.sequelize = sequelize.sequelize
 

@@ -1,4 +1,4 @@
-import database from '../../../repository';
+import database from '../../../database';
 import Sequelize from 'sequelize';
 
 interface UserModel extends Sequelize.Model {

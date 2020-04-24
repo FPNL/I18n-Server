@@ -6,12 +6,13 @@ import Logger  = require( 'morgan');
 import Path  = require( 'path');
 // 模組
 import ApiRouter from './api/v1';
-import Database from './repository';
+import Database from './database';
 
 const app = Express();
 
 Database.sequelize.sequelizeConnectionTest()
 Database.mongoose.mongooseConnectionTest();
+Database.redis.redisConnectionTest();
 // Database.mongo.run().catch(console.dir);
 
 // view engine setup

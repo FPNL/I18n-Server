@@ -12,7 +12,9 @@ const {
   DATABASE,
   DATABASE_TYPE,
   MONGO_DB_URI,
-  MONGO_DB_DATABASE
+  MONGO_DB_DATABASE,
+  REDIS_PORT,
+  REDIS_HOST,
 } = process.env;
 
 export default ({
@@ -22,5 +24,7 @@ export default ({
   DATABASE,
   DATABASE_TYPE,
   MONGO_DB_URI,
-  MONGO_DB_DATABASE
+  MONGO_DB_DATABASE,
+  REDIS_PORT,
+  REDIS_HOST,
 } as Config.StringEnv);
