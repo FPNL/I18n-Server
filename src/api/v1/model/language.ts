@@ -2,6 +2,7 @@ import Mongoose = require('mongoose');
 
 import Database from '../../../repository';
 import { LangModelType } from './model';
+import { Service } from '../service/service';
 
 const mongoose = Database.mongoose.Mongoose;
 const Schema = mongoose.Schema;
@@ -39,7 +40,23 @@ function initLanguageModel(tableName_main: string) {
 }
 
 
-function TEST() {
+function TEST(data: any) {
+    console.log(23);
+
+    const bulkOps = [
+        { name: 'test1', content: { ch: "hi" } },
+        { name: 'test2', content: { ch: "hi" } },
+        { name: 'test2', content: { jp: "你" } },
+        { name: 'test3', content: { ch: "你" } },
+    ].map(value => ({
+        updateOne: {
+            filter: { name: value.name },
+            update: { content: value.content }
+        }
+    }));
+    console.log(bulkOps);
+
+    return LangModel.bulkWrite(bulkOps);
 }
 
 // FIXME 以下
@@ -64,7 +81,7 @@ function readWordsData(data, params: { limit: number, skip: number }) {
     return LangModel.find({}, '-_id', { skip, limit });
 }
 
-function createLanguageColumn(data: { lang: string; }) {
+function updateLanguageByPushing(data: { lang: string; }) {
     return LangConfigModel.findOneAndUpdate({}, { $addToSet: { langs: data.lang } });
 }
 
@@ -73,10 +90,27 @@ function readWordExist(data) {
 
 }
 
-function readWordsRepeat(data: Array<string>) {
+function readWordsInName(data: Array<string>) {
     return LangModel.find({ name: { $in: data } }, '-_id name');
 }
 
+function readWordsNotInName(data: Array<string>) {
+    return LangModel.find({ name: { $nin: data } }, '-_id name');
+}
+
+function insertWords(data: Array<Service.wordFormat>) {
+    return LangModel.insertMany(data);
+}
+
+function updateWords(data: Array<Service.wordFormat>) {
+    const bulkOps = data.map(value => ({
+        updateOne: {
+            filter: { name: value.name },
+            update: { content: value.content }
+        }
+    }));
+    return LangModel.bulkWrite(bulkOps);
+}
 // function insertWord(data) {
 
 //     const dataKeys = Object.keys(data).map(key => `\`${key}\``).join();
@@ -105,12 +139,15 @@ function readWordsRepeat(data: Array<string>) {
 // }
 
 export default {
+    TEST,
     initLanguageModel,
     readLanguageList,
     readWordsData,
-    createLanguageColumn,
-    readWordsRepeat,
-    TEST,
+    updateLanguageByPushing,
+    readWordsInName,
+    readWordsNotInName,
+    insertWords,
+    updateWords,
     // readWordExist,
     // insertWord,
 };

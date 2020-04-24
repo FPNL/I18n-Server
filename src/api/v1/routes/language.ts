@@ -40,19 +40,21 @@ router.post('/addWords', async (req, res, next): Promise<void> => {
 });
 
 router.post('/alterWords', async (req, res, next): Promise<void> => {
+    const responseData = await Controller.Lang.alterWordsHandler(req);
     res.send("建造中．．．")
 })
 
-// router.delete('/deleteLanguage', async (req, res, next): Promise<void> => {
-//     next()
-// })
+router.delete('/deleteLanguage', async (req, res, next): Promise<void> => {
+    res.send("尚未建造．．．")
+})
 
-// router.delete('/deleteWord', async (req, res, next): Promise<void> => {
-//     const responseData = await Controller.Lang.deleteWordHandler(req);
-//     Util.routerResponseFormatter(res, responseData);
-// }, (req, res): void => {
-//     // TODO Redis Delete
-//     // const RedisDelete();
-// })
+router.delete('/deleteWords', async (req, res, next): Promise<void> => {
+    // const responseData = await Controller.Lang.deleteWordHandler(req);
+    // Util.routerResponseFormatter(res, responseData);
+    res.send("尚未建造．．．")
+}, (req, res): void => {
+    // TODO Redis Delete
+    // const RedisDelete();
+})
 
 export default router;

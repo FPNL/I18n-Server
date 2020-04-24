@@ -39,12 +39,13 @@ async function getDataFromModel(modelFn: Function, data: any): Promise<{ result:
 async function validationErrorHandler(req: Express.Request): Promise<[boolean, string]> {
     const errors = await Validator.validationResult(req);
     let result = '';
-    if ( !errors.isEmpty() ) {
+    const isError = !errors.isEmpty()
+
+    if ( isError ) {
         console.log("資料驗證錯誤", errors);
         result = Object.keys(errors.mapped())[0];
     }
-
-    return [errors.isEmpty(), result]
+    return [isError, result]
 }
 
 export default { routerResponseFormatter, getDataFromModel, validationErrorHandler};

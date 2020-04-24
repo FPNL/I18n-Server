@@ -6,11 +6,11 @@ import Model from'../model';
 import Util from '../util';
 import ErrorPackage from '../../../package/e';
 import { Service } from './service';
+import { LangModelType } from '../model/model';
 
-async function TEST(reqBodyData: Service.wordsFormat) {
-    const result = await Model.Lang.TEST();
+async function TEST(reqBodyData: any) {
+    const result = await Model.Lang.TEST(reqBodyData);
     console.log(result);
-
 }
 
 async function getLangList(reqBodyData?: any): Promise<Array<string>|undefined> {
@@ -31,7 +31,7 @@ async function checkLangColumnValidation(req: Express.Request): Promise<[boolean
     if (err) {
         return [err, ErrorPackage.HttpStatus.ERROR_LANG_COLUMN_FORMAT];
     }
-    return [false, ErrorPackage.HttpStatus.OK];
+    return [err, ErrorPackage.HttpStatus.OK];
 }
 
 async function checkLangColumnRepeat(reqBodyData: { lang: string }): Promise<boolean|undefined> {
@@ -40,8 +40,8 @@ async function checkLangColumnRepeat(reqBodyData: { lang: string }): Promise<boo
     return ifLangHadRepeat;
 }
 
-async function addOneLangColumnToDB(reqBodyData: { lang: string; }) {
-    return await Model.Lang.createLanguageColumn(reqBodyData);
+async function addOneLangToDB(reqBodyData: { lang: string; }) {
+    return await Model.Lang.updateLanguageByPushing(reqBodyData);
 }
 
 async function checkWordsValidation(req: Express.Request): Promise<[boolean, number]> {
@@ -57,9 +57,10 @@ async function checkWordsValidation(req: Express.Request): Promise<[boolean, num
 
     await namesCheck(req, null, () => { });
     await contentCheck(req, null, () => { });
+
     const [err, result] = await Util.validationErrorHandler(req);
     if (err) {
-        let errorCode = 500;
+        let errorCode = ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR;
         if (result.includes('.name')) {
             errorCode = ErrorPackage.HttpStatus.ERROR_NAME_FORMAT;
         } else if (result.includes('.content')) {
@@ -69,12 +70,12 @@ async function checkWordsValidation(req: Express.Request): Promise<[boolean, num
     }
     return [false, ErrorPackage.HttpStatus.OK]
 }
-
-async function checkWordsDataMatchLangColumn(reqBodyData: Service.wordsFormat): Promise<boolean> {
-    // 時間複雜度 O(n*m)
-    // n = content.length * data.length;
-    // m = langs.length;
-
+/**
+ * 時間複雜度 O(n*m)
+ * n = content.length * data.length;
+ * m = langs.length;
+ */
+async function checkWordsDataMatchLangs(reqBodyData: Service.wordsFormat): Promise<boolean> {
     const result = await Model.Lang.readLanguageList();
 
     if (result && result.langs) {
@@ -87,12 +88,60 @@ async function checkWordsDataMatchLangColumn(reqBodyData: Service.wordsFormat): 
     return false;
 }
 
-async function checkWordsRepeat(reqBodyData: Service.wordsFormat): Promise<[boolean, Array<any>]> {
+// TODO 有兩種 repeat 一種是內部重複 另種是 跟資料庫重複
+
+function checkReqBodyDataRepeat(reqBodyData: Service.wordsFormat): [boolean, Array<string>] {
     const namesArr = reqBodyData.data.map(value => value.name);
-    const result = await Model.Lang.readWordsRepeat(namesArr);
-    return [result.length > 0, result];
+    const findDuplicates = (arr: string[]) => arr.filter((item, index) => arr.indexOf(item) !== index)
+    const repeatNamesArr = [...new Set(findDuplicates(namesArr))];
+    return [repeatNamesArr.length > 0, repeatNamesArr];
 }
 
+async function checkWordsExistInDB(reqBodyData: Service.wordsFormat): Promise<[boolean, Array<string>]> {
+    const namesArr = reqBodyData.data.map(value => value.name);
+    const result = await Model.Lang.readWordsInName(namesArr);
+    const repeatNamesArr = result.map(v => v.name);
+    return [result.length > 0, repeatNamesArr];
+}
+
+async function checkWordsNotExistInDB(reqBodyData: Service.wordsFormat): Promise<[boolean, Array<string>]> {
+    const namesArr = reqBodyData.data.map(value => value.name);
+    const result = await Model.Lang.readWordsNotInName(namesArr);
+    const repeatNamesArr = result.map(v => v.name);
+    return [result.length > 0, repeatNamesArr];
+}
+
+async function removeRepeatWordsFromReqBodyData(reqBodyData: Service.wordsFormat, repeatData: any[]): Promise<boolean> {
+    try {
+        reqBodyData.data = reqBodyData.data.filter(value => {
+            const isNameRepeat = repeatData.some(val => val.name === value.name);
+            return !isNameRepeat;
+        });
+        return false;
+    } catch (error) {
+        return true;
+    }
+}
+
+async function insertWordsIntoDB(reqBodyData: Service.wordsFormat): Promise<boolean> {
+    const { data } = reqBodyData;
+    try {
+        await Model.Lang.insertWords(data);
+        return false;
+    } catch (error) {
+        return true;
+    }
+}
+
+async function updateWordsIntoDB(reqBodyData: Service.wordsFormat): Promise<boolean> {
+    const { data } = reqBodyData;
+    try {
+        await Model.Lang.updateWords(data);
+        return false;
+    } catch (error) {
+        return true;
+    }
+}
 
 // // TODO 多重
 // async function wordsValidation(req) {
@@ -136,25 +185,23 @@ async function checkWordsRepeat(reqBodyData: Service.wordsFormat): Promise<[bool
 //     return dataId;
 // }
 
-// // TODO 多重
-// async function insertWordsIntoDB(reqBodyData) {
-//     const [ dataId ] = await Model.Lang.insertWord(reqBodyData);
-//     return dataId;
-// }
 
 
 
 
 export default {
+    TEST,
     getLangList,
     getLimitWordsData,
     checkLangColumnValidation,
     checkLangColumnRepeat,
-    addOneLangColumnToDB,
+    addOneLangToDB,
     checkWordsValidation,
-    checkWordsDataMatchLangColumn,
-    checkWordsRepeat,
-    TEST,
-    // insertWordIntoDB,
+    checkWordsDataMatchLangs,
+    checkReqBodyDataRepeat,
+    checkWordsExistInDB,
+    checkWordsNotExistInDB,
+    removeRepeatWordsFromReqBodyData,
+    insertWordsIntoDB,
     // checkWordDataMatchLangColumn,
 };
