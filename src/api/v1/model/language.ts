@@ -1,9 +1,12 @@
-import Mongoose = require('mongoose');
+// import Mongoose = require('mongoose');
+// import Redis =  require('redis');
+const { promisify } = require("util");
 
 import Database from '../../../database';
 import { LangModelType } from './model';
 import { Service } from '../service/service';
 
+const redis = Database.redis.redis;
 const mongoose = Database.mongoose.Mongoose;
 const Schema = mongoose.Schema;
 
@@ -40,32 +43,12 @@ function initLanguageModel(tableName_main: string) {
 }
 
 
-function TEST(data: any) {
-    console.log(23);
-
-    const bulkOps = [
-        { name: 'test1', content: { ch: "hi" } },
-        { name: 'test2', content: { ch: "hi" } },
-        { name: 'test2', content: { jp: "你" } },
-        { name: 'test3', content: { ch: "你" } },
-    ].map(value => ({
-        updateOne: {
-            filter: { name: value.name },
-            update: { content: value.content }
-        }
-    }));
-    console.log(bulkOps);
-
-    return LangModel.bulkWrite(bulkOps);
+function TEST(data?: any) {
+    const keysAsync = promisify(redis.keys).bind(redis);
+    const getAsync = promisify(redis.get).bind(redis);
+    const typeAsync = promisify(redis.type).bind(redis);
+    return keysAsync('*')
 }
-
-// FIXME 以下
-/*  這裡全用 raw query */
-
-// function createNewLanguage() {
-//     在 languages 新增欄位
-// }
-//
 
 function readLanguageList() {
     const result = LangConfigModel.findOne({}, '-_id langs')
@@ -78,7 +61,7 @@ function readWordsData(data, params: { limit: number, skip: number }) {
     if (limit > 50) {
         limit = 50;
     }
-    return LangModel.find({}, '-_id', { skip, limit });
+    return LangModel.find({}, '-_id name content', { skip, limit });
 }
 
 function updateLanguageByPushing(data: { lang: string; }) {
@@ -120,6 +103,35 @@ function deleteLang(data: string) {
     return LangConfigModel.findOneAndUpdate({}, { $pull: { langs: data } });
 }
 
+function r_setLangSet(data: string[]|string): boolean {
+    const keyName = 'langs';
+    return redis.sadd(keyName, data);
+
+}
+
+function r_getLangSet(): string[] {
+    const keyName = 'langs';
+    const smembersAsync = promisify(redis.smembers).bind(redis);
+    return smembersAsync(keyName);
+}
+
+function r_removeLangSet(data: string): string[] {
+    const keyName = 'langs';
+    const sremAsync = promisify(redis.srem).bind(redis);
+    return sremAsync(keyName, data);
+}
+
+function r_getKeyExist(data: string): boolean {
+    const keyExistAsync = promisify(redis.exists).bind(redis);
+    return keyExistAsync(data);
+}
+
+function r_setWordHash(data: {name: string,content: {[p: string]: string}}) {
+    const name = data.name;
+    const hsetAsync = promisify(redis.hset).bind(redis)
+    return hsetAsync(name, data.content);
+}
+
 export default {
     TEST,
     initLanguageModel,
@@ -131,7 +143,10 @@ export default {
     insertWords,
     updateWords,
     deleteWords,
-    deleteLang
+    deleteLang,
     // readWordExist,
-    // insertWord,
+    r_setLangSet,
+    r_getLangSet,
+    r_removeLangSet,
+    r_getKeyExist,
 };

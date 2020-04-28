@@ -2,12 +2,12 @@ import Express = require('express');
 
 import ErrorPackage from '../../../package/e';
 import Service from '../service';
-import { Controller } from './controller';
+import { ControllerDeclare } from './controller';
 import { Service as ServiceDeclare } from '../service/service';
 
 
-async function getLanguageListHandler(): Promise<Controller.typicalResponse> {
-    // router 有權限檢查的 middleware (製作中) -> 給資料.
+async function getLanguageListHandler(): Promise<ControllerDeclare.typicalResponse> {
+    // router 有權限檢查的 middleware  -> 給資料.
     try {
         const result = await Service.Lang.getLangList();
         if (result /*&& await Service.Lang.checkResponseLangColumnFormat(result)*/) {
@@ -21,16 +21,37 @@ async function getLanguageListHandler(): Promise<Controller.typicalResponse> {
     return { status: ErrorPackage.HttpStatus.NO_DATA, result: false };
 }
 
+async function r_getLangListHandler(): Promise<ControllerDeclare.typicalResponse> {
+    // check has key -> 給資料.
+    // router 有權限檢查的 middleware  -> 給資料.
+    try {
+        const keyName = 'langs';
+        const hasKey = await Service.Lang.checkKeyExist(keyName);
+        if (!hasKey) {
+            return { status: ErrorPackage.HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
+        }
 
-async function getWordsContentHandler(req: Express.Request): Promise<Controller.typicalResponse> {
-    // router 有權限檢查的 middleware (製作中) -> 從資料庫取得資料 -> 檢查返回的資料格式 -> 給資料
+        const result = await Service.Lang.getLangListFromRedis();
+        if (result.length /*&& await Service.Lang.checkResponseLangColumnFormat(result)*/) {
+            return { status: ErrorPackage.HttpStatus.OK, result };
+        }
+
+    } catch (error) {
+        console.error("getLanguageListHandler 錯誤", error);
+        return { status: ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR, result: false}
+    }
+    return { status: ErrorPackage.HttpStatus.NO_DATA, result: false };
+}
+
+
+async function getWordsContentHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
+    // router 有權限檢查的 middleware  -> 從資料庫取得資料 -> ?檢查返回的資料格式? -> 給資料
     try {
         const reqParam = <{ limit?: string; page?: string;}>req.params;
 
         const result = await Service.Lang.getLimitWordsData(reqParam);
 
-        // TODO 中 檢查返回的資料格式
-        if (result /*&& await Service.Lang.checkResponseWordsContentFormat(result)*/ ) {
+        if (result) {
             return { status: ErrorPackage.HttpStatus.OK, result };
         }
 
@@ -42,7 +63,7 @@ async function getWordsContentHandler(req: Express.Request): Promise<Controller.
 }
 
 
-async function addLanguageHandler(req: Express.Request): Promise<Controller.typicalResponse> {
+async function addLanguageHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // 檢查格式 -> 檢查重複欄位 -> 插入新欄位 -> 更新 redis 語言列表
     try {
         const reqBodyData = <{ lang: string; }>req.body;
@@ -59,6 +80,8 @@ async function addLanguageHandler(req: Express.Request): Promise<Controller.typi
 
         await Service.Lang.addOneLangToDB(reqBodyData);
 
+        await Service.Lang.setLangListIntoRedis(reqBodyData);
+
     } catch (error) {
         console.error("addLanguageHandler 錯誤", error);
         return { status: ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
@@ -67,7 +90,7 @@ async function addLanguageHandler(req: Express.Request): Promise<Controller.typi
 }
 
 
-async function addWordsHandler(req: Express.Request): Promise<Controller.typicalResponse> {
+async function addWordsHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     //  validation -> 確認是否有符合語言名單 -> checkExist -> insertModel -> response_OK.
     try {
         const reqBodyData = <ServiceDeclare.wordsFormat>req.body;
@@ -115,7 +138,7 @@ async function addWordsHandler(req: Express.Request): Promise<Controller.typical
     return { status: ErrorPackage.HttpStatus.OK, result: true };
 }
 
-async function alterWordsHandler(req: Express.Request): Promise<Controller.typicalResponse> {
+async function alterWordsHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // 跟 createWordsHandler 很像
     // name and content validation -> 更新的語言都有符合 config.langs -> check 資料內部沒有重複 -> 檢查資料與資料庫都有相對應的存在  -> update model.
     try {
@@ -126,7 +149,7 @@ async function alterWordsHandler(req: Express.Request): Promise<Controller.typic
             return { status: validationErrorCode, result: false };
         }
 
-        let [errorNotMatch, wrongLang] = await Service.Lang.checkWordsDataMatchLangs(reqBodyData);
+        const [errorNotMatch, wrongLang] = await Service.Lang.checkWordsDataMatchLangs(reqBodyData);
         if (errorNotMatch) {
             return { status: ErrorPackage.HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: wrongLang };
         }
@@ -153,7 +176,7 @@ async function alterWordsHandler(req: Express.Request): Promise<Controller.typic
     return { status: ErrorPackage.HttpStatus.OK, result: true };
 }
 
-async function deleteWordsHandler(req: Express.Request): Promise<Controller.typicalResponse> {
+async function deleteWordsHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // delete multiple data 傳來格式應該為 {"data": ["name1", "name2"] } -> name validation -> check exist -> delete data
     try {
         const reqBodyData = <{data: Array<string>}>req.body;
@@ -162,7 +185,6 @@ async function deleteWordsHandler(req: Express.Request): Promise<Controller.typi
         if(error) {
             return { status: validationErrorCode, result: false };
         }
-
 
         const [isNotExist, ghostData] = await Service.Lang.checkWordsNotExistInDB(reqBodyData);
         if (isNotExist) {
@@ -181,7 +203,7 @@ async function deleteWordsHandler(req: Express.Request): Promise<Controller.typi
     return { status: ErrorPackage.HttpStatus.OK, result: true };
 }
 
-async function deleteLangHandler(req: Express.Request): Promise<Controller.typicalResponse> {
+async function deleteLangHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // validation is string alphanumberic -> check config exist -> delete
     try {
         const reqBodyData = <{lang: string}>req.body;
@@ -200,6 +222,9 @@ async function deleteLangHandler(req: Express.Request): Promise<Controller.typic
         if (error) {
             throw ErrorPackage.HttpStatusMessage.get(ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        await Service.Lang.removeLangListFromRedis(reqBodyData);
+
     } catch (error) {
         console.error("deleteLangHandler 錯誤 : ", error);
         return { status: ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
@@ -216,4 +241,5 @@ export default {
     alterWordsHandler,
     deleteWordsHandler,
     deleteLangHandler,
+    r_getLangListHandler
 };

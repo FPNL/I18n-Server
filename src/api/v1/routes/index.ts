@@ -2,13 +2,11 @@ import Express = require('express');
 
 import User from './user';
 import Lang from './language';
-
+import {isAuthByPassport} from '../controller/auth';
 const Router_v1 = Express.Router();
 
 /* GET home page. */
 Router_v1.use('/user', User);
-// TODO 這層的 router 全都要有 權限
-// < 製作權限檢查的 middleware
-Router_v1.use('/language', Lang);
+Router_v1.use('/language', isAuthByPassport, Lang);
 
 export default Router_v1;

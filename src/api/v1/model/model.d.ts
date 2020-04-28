@@ -13,3 +13,16 @@ export namespace LangModelType {
     // name: string;
   }
 }
+
+export namespace UserModelType {
+  export interface User {
+    id: string;
+    account: string;
+    password: string;
+    nickname: string;
+    timeCreate: Date;
+    timeUpdate: Date;
+    validPassword: (password: string) => boolean;
+  }
+
+}

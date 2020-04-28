@@ -8,9 +8,26 @@ import ErrorPackage from '../../../package/e';
 import { Service } from './service';
 import { LangModelType } from '../model/model';
 
-async function TEST(reqBodyData: any) {
+async function TEST(reqBodyData?: any) {
     const result = await Model.Lang.TEST(reqBodyData);
     console.log(result);
+
+    return JSON.stringify(result);
+}
+
+async function setLangListIntoRedis(reqBodyData: { lang: string;}): Promise<boolean> {
+    const result = await Model.Lang.r_setLangSet(reqBodyData.lang)
+    return result;
+}
+
+async function getLangListFromRedis(): Promise<Array<string>> {
+    const result = await Model.Lang.r_getLangSet();
+    return result;
+}
+
+async function removeLangListFromRedis(reqBodyData: { lang: string; }) {
+    const result = await Model.Lang.r_removeLangSet(reqBodyData.lang);
+    return result;
 }
 
 async function getLangList(reqBodyData?: any): Promise<Array<string>|undefined> {
@@ -55,32 +72,40 @@ async function checkNameValidation(req: Express.Request): Promise<[boolean, numb
 }
 
 async function checkWordsValidation(req: Express.Request): Promise<[boolean, number]> {
-    const namesCheck = Validator.check('data.*.name').isAlphanumeric();
-    await namesCheck(req, null, () => { });
+    let errorCode = ErrorPackage.HttpStatus.OK;
 
-    const contentCheck = Validator.check('data.*.content').custom((content: Service.wordContent): boolean => {
+    const dataCheck = Validator.body('data').isArray({ min: 1 });
+    const namesCheck = Validator.body('data.*.name').isAlphanumeric();
+    const contentCheck = Validator.body('data.*.content').custom((content: Service.wordContent): boolean => {
         if (content) {
             for (const lang in content) {
                 if (content.hasOwnProperty(lang) && !lang.match(/^[\w\-]+$/)) {
                     throw new Error(`data.content 的 ${lang} 錯誤，須為 "a-Z", "0-9", "-", "_"`);
                 }
             }
+        } else {
+            errorCode = ErrorPackage.HttpStatus.ERROR_DATA_FORMAT;
         }
         return true;
     });
+
+
+    await dataCheck(req, null, () => { });
+    await namesCheck(req, null, () => { });
     await contentCheck(req, null, () => { });
 
     const [err, result] = await Util.validationErrorHandler(req);
     if (err) {
-        let errorCode = ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR;
         if (result.includes('.name')) {
             errorCode = ErrorPackage.HttpStatus.ERROR_NAME_FORMAT;
         } else if (result.includes('.content')) {
             errorCode = ErrorPackage.HttpStatus.ERROR_CONTENT_FORMAT;
+        } else if (result === 'data') {
+            errorCode = ErrorPackage.HttpStatus.ERROR_DATA_FORMAT;
         }
         return [err, errorCode];
     }
-    return [false, ErrorPackage.HttpStatus.OK]
+    return [false, errorCode]
 }
 /**
  * 時間複雜度 O(n*m)
@@ -94,11 +119,14 @@ async function checkWordsDataMatchLangs(reqBodyData: Service.wordsFormat): Promi
         const { langs } = result;
         let notMatchedData: string|undefined = "";
         const everyDataMatched = reqBodyData.data.every(eachData => {
-            if (!eachData.hasOwnProperty("content")) {
+            if (!eachData.hasOwnProperty("content") || !eachData.content) {
+                eachData.content = {};
                 return true;
             }
             const reqKeys = Object.keys(eachData.content);
             notMatchedData = reqKeys.find(column => !langs.includes(column));
+            console.log(133, notMatchedData);
+
             return !notMatchedData; // 左側為縮寫，完整句子： if (notMatchedData) { return false; } else { return true; }
         });
 
@@ -126,7 +154,9 @@ async function checkWordsExistInDB(reqBodyData: Service.wordsFormat): Promise<[b
 async function checkWordsNotExistInDB(reqBodyData: Service.wordsFormat | { data: Array<string> }): Promise<[boolean, Array<string>]> {
     // @ts-ignore
     const namesArr = reqBodyData.data.map(value => value.name ?? value);
+
     const result = await Model.Lang.readWordsInName(namesArr);
+    console.log(123, result);
     const repeatNamesArr = result.map(v => v.name);
     const wordNotInDB = namesArr.filter(v => !repeatNamesArr.includes(v));
     return [wordNotInDB.length > 0, wordNotInDB];
@@ -186,7 +216,9 @@ async function deleteLangFromDB(reqBodyData: { lang: string; }): Promise<boolean
     }
 }
 
-
+async function checkKeyExist(keyName: string): Promise<boolean> {
+    return await Model.Lang.r_getKeyExist(keyName);
+}
 
 export default {
     TEST,
@@ -205,5 +237,9 @@ export default {
     updateWordsIntoDB,
     checkNameValidation,
     deleteWordsFromDB,
-    deleteLangFromDB
+    deleteLangFromDB,
+    setLangListIntoRedis,
+    getLangListFromRedis,
+    removeLangListFromRedis,
+    checkKeyExist,
 };

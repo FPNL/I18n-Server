@@ -15,6 +15,8 @@ const {
   MONGO_DB_DATABASE,
   REDIS_PORT,
   REDIS_HOST,
+  SESSION_SECRET,
+  SESSION_MAX_AGE,
 } = process.env;
 
 export default ({
@@ -27,4 +29,6 @@ export default ({
   MONGO_DB_DATABASE,
   REDIS_PORT,
   REDIS_HOST,
+  SESSION_SECRET,
+  SESSION_MAX_AGE,
 } as Config.StringEnv);

@@ -1,17 +1,55 @@
 import Validator = require('express-validator');
+import Bcrypt = require('bcrypt');
 
 import ErrorPackage from '../../../package/e';
 import Util from '../util';
 import Model from '../model';
+import { UserModelType } from '../model/model';
 
 async function checkUserExist(data) {
-    const { result } = await Util.getDataFromModel(Model.User.findUser, data);
-    return !!result;
+    const { result } = await Util.getDataFromModel(Model.User.countUsers, data);
+    console.log("checkUserExist", result);
+    return result;
 }
 
 async function createUserData(data) {
     const { result } = await Util.getDataFromModel(Model.User.createUser, data);
     return !!result;
+}
+
+async function fetchUserData(data: { account: string; }): Promise<[boolean, UserModelType.User|number]> {
+    const isError = true;
+    try {
+        const result = await Model.User.findUser(data);
+        if (result) {
+            const userData = <UserModelType.User>result.toJSON();
+            return [!isError, userData];
+        }
+        return [isError, ErrorPackage.HttpStatus.ERROR_NOT_EXIST_USER];
+    } catch (error) {
+        return [isError, ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR];
+    }
+
+}
+
+function hashPassword(reqBodyData: {password: string} ): [boolean, number] {
+    const saltRounds = 10;
+    try {
+        const hash = Bcrypt.hashSync(reqBodyData.password, saltRounds);
+        reqBodyData.password = hash;
+        return [false, ErrorPackage.HttpStatus.OK];
+    } catch (error) {
+        return [true, ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR];
+    }
+}
+
+function compareHashPassword(reqBodyData: { password: string; }, passwordFromDB: string): [boolean, number] {
+    try {
+        const isCorrect = Bcrypt.compareSync(reqBodyData.password, passwordFromDB);
+        return [!isCorrect, ErrorPackage.HttpStatus.ERROR_PASSWORD]
+    } catch (error) {
+        return [true, ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR];
+    }
 }
 
 async function loginValidation(req): Promise<[boolean, number]>  {
@@ -68,4 +106,12 @@ function validationErrorResponse(err: boolean, result: string): [boolean, number
     return [false, ErrorPackage.HttpStatus.OK];
 }
 
-export default { checkUserExist, createUserData, loginValidation, registerValidation }
+export default {
+    checkUserExist,
+    createUserData,
+    fetchUserData,
+    loginValidation,
+    registerValidation,
+    hashPassword,
+    compareHashPassword
+}

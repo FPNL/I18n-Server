@@ -2,9 +2,9 @@ import Validator = require('express-validator');
 import Express = require('express');
 
 import ErrorPackage from '../../../package/e';
-import { Controller } from '../controller/controller';
+import { ControllerDeclare } from '../controller/controller';
 
-function routerResponseFormatter(res: Express.Response, responseData: Controller.typicalResponse): void {
+function routerResponseFormatter(res: Express.Response, responseData: ControllerDeclare.typicalResponse): void {
     const message = ErrorPackage.HttpStatusMessage.get(responseData.status);
 
     if(responseData.status > 600) {
@@ -20,7 +20,8 @@ function routerResponseFormatter(res: Express.Response, responseData: Controller
 
 async function getDataFromModel(modelFn: Function, data: any): Promise<{ result: Promise<Function> }> {
     try {
-        return { result: await modelFn(data) };
+        const result = await modelFn(data);
+        return { result };
     } catch (e) {
         console.error(" ＝＝＝ getDataFromModel 錯誤 ＝＝＝")
         let status = ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -39,7 +40,7 @@ async function getDataFromModel(modelFn: Function, data: any): Promise<{ result:
 async function validationErrorHandler(req: Express.Request): Promise<[boolean, string]> {
     const errors = await Validator.validationResult(req);
     let result = '';
-    const isError = !errors.isEmpty()
+    const isError = !errors.isEmpty();
     if ( isError ) {
         console.log("資料驗證錯誤", errors);
         result = Object.keys(errors.mapped())[0];
