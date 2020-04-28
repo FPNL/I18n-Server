@@ -1,5 +1,6 @@
-import database from '../../../database';
 import Sequelize from 'sequelize';
+
+import database from '../../../database';
 
 //   FIXME 增加 validation
 class User extends Sequelize.Model {

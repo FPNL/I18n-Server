@@ -1,54 +1,55 @@
 import Validator = require('express-validator');
 import Bcrypt = require('bcrypt');
 
-import ErrorPackage from '../../../package/e';
-import Util from '../util';
-import Model from '../model';
-import { UserModelType } from '../model/model';
+import e from '../../../package/e';
+import util from '../util';
+import model from '../model';
+import config from '../../../config';
+import { ModelDeclare } from '../model/model';
 
 async function checkUserExist(data) {
-    const { result } = await Util.getDataFromModel(Model.User.countUsers, data);
+    const { result } = await util.getDataFromModel(model.User.countUsers, data);
     console.log("checkUserExist", result);
     return result;
 }
 
 async function createUserData(data) {
-    const { result } = await Util.getDataFromModel(Model.User.createUser, data);
+    const { result } = await util.getDataFromModel(model.User.createUser, data);
     return !!result;
 }
 
-async function fetchUserData(data: { account: string; }): Promise<[boolean, UserModelType.User|number]> {
+async function fetchUserData(data: { account: string; }): Promise<[boolean, ModelDeclare.User|number]> {
     const isError = true;
     try {
-        const result = await Model.User.findUser(data);
+        const result = await model.User.findUser(data);
         if (result) {
-            const userData = <UserModelType.User>result.toJSON();
+            const userData = <ModelDeclare.User>result.toJSON();
             return [!isError, userData];
         }
-        return [isError, ErrorPackage.HttpStatus.ERROR_NOT_EXIST_USER];
+        return [isError, e.HttpStatus.ERROR_NOT_EXIST_USER];
     } catch (error) {
-        return [isError, ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR];
+        return [isError, e.HttpStatus.INTERNAL_SERVER_ERROR];
     }
 
 }
 
 function hashPassword(reqBodyData: {password: string} ): [boolean, number] {
-    const saltRounds = 10;
+    const saltRounds = Number(config.BCRYPT_SALT_ROUNDS) || 10;
     try {
         const hash = Bcrypt.hashSync(reqBodyData.password, saltRounds);
         reqBodyData.password = hash;
-        return [false, ErrorPackage.HttpStatus.OK];
+        return [false, e.HttpStatus.OK];
     } catch (error) {
-        return [true, ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR];
+        return [true, e.HttpStatus.INTERNAL_SERVER_ERROR];
     }
 }
 
 function compareHashPassword(reqBodyData: { password: string; }, passwordFromDB: string): [boolean, number] {
     try {
         const isCorrect = Bcrypt.compareSync(reqBodyData.password, passwordFromDB);
-        return [!isCorrect, ErrorPackage.HttpStatus.ERROR_PASSWORD]
+        return [!isCorrect, e.HttpStatus.ERROR_PASSWORD]
     } catch (error) {
-        return [true, ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR];
+        return [true, e.HttpStatus.INTERNAL_SERVER_ERROR];
     }
 }
 
@@ -56,7 +57,7 @@ async function loginValidation(req): Promise<[boolean, number]>  {
     await accountValidation(req);
     await passwordValidation(req);
 
-    const [err, result] = await Util.validationErrorHandler(req);
+    const [err, result] = await util.validationErrorHandler(req);
     return validationErrorResponse(err, result);
 }
 
@@ -64,7 +65,7 @@ async function registerValidation(req): Promise<[boolean, number]> {
     await accountValidation(req);
     await passwordValidation(req);
     await nicknameValidation(req);
-    const [err, result] = await Util.validationErrorHandler(req);
+    const [err, result] = await util.validationErrorHandler(req);
     return validationErrorResponse(err, result);
 }
 
@@ -89,13 +90,13 @@ function validationErrorResponse(err: boolean, result: string): [boolean, number
         let errorCode: number;
         switch (result) {
             case 'account':
-                errorCode = ErrorPackage.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE
+                errorCode = e.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE
                 break;
             case 'password':
-                errorCode = ErrorPackage.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
+                errorCode = e.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
                 break;
             case 'nickname':
-                errorCode = ErrorPackage.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE
+                errorCode = e.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE
                 break;
             default:
                 errorCode = 500;
@@ -103,7 +104,7 @@ function validationErrorResponse(err: boolean, result: string): [boolean, number
         }
         return [err, errorCode]
     }
-    return [false, ErrorPackage.HttpStatus.OK];
+    return [false, e.HttpStatus.OK];
 }
 
 export default {

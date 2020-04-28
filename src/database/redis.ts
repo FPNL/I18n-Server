@@ -1,8 +1,8 @@
 import Redis = require('redis');
-import Config from '../config';
 
-// @ts-ignore
-const redis = Redis.createClient(Config.REDIS_PORT, Config.REDIS_HOST); // this creates a new client
+import config from '../config';
+
+const redis = Redis.createClient(Number(config.REDIS_PORT), config.REDIS_HOST); // this creates a new client
 
 function redisConnectionTest() {
   console.log("Redis 連線中... ");

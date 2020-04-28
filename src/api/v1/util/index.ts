@@ -1,11 +1,11 @@
 import Validator = require('express-validator');
 import Express = require('express');
 
-import ErrorPackage from '../../../package/e';
+import e from '../../../package/e';
 import { ControllerDeclare } from '../controller/controller';
 
 function routerResponseFormatter(res: Express.Response, responseData: ControllerDeclare.typicalResponse): void {
-    const message = ErrorPackage.HttpStatusMessage.get(responseData.status);
+    const message = e.HttpStatusMessage.get(responseData.status);
 
     if(responseData.status > 600) {
         responseData.status = 400;
@@ -24,7 +24,7 @@ async function getDataFromModel(modelFn: Function, data: any): Promise<{ result:
         return { result };
     } catch (e) {
         console.error(" ＝＝＝ getDataFromModel 錯誤 ＝＝＝")
-        let status = ErrorPackage.HttpStatus.INTERNAL_SERVER_ERROR;
+        let status = e.HttpStatus.INTERNAL_SERVER_ERROR;
 
         if (e.name === 'SequelizeValidationError') {
             // TODO 低 紀錄錯誤

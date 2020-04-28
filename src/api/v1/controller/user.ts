@@ -3,7 +3,7 @@ import Passport = require('passport');
 
 import ErrorPackage from '../../../package/e';
 import Service from '../service';
-import { UserModelType } from '../model/model';
+import { ModelDeclare } from '../model/model';
 
 function customPassportAuth(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
     Passport.authenticate('local', function (_err, user, _info) {
@@ -41,14 +41,14 @@ async function loginHandler(req: Express.Request): Promise<[boolean, { id: strin
         }
 
         // 確認密碼
-        const [hashError, compareResult] = Service.User.compareHashPassword(reqData, (userOrHttpStatus as UserModelType.User).password);
+        const [hashError, compareResult] = Service.User.compareHashPassword(reqData, (userOrHttpStatus as ModelDeclare.User).password);
         if (hashError) {
             req.responseData = { result: false, status: compareResult }
             return [isError, null];
         }
 
         req.responseData = { result: true, status: ErrorPackage.HttpStatus.OK };
-        return [!isError, (userOrHttpStatus as UserModelType.User)];
+        return [!isError, (userOrHttpStatus as ModelDeclare.User)];
 
         // TODO 低 websocket 連線
         // WebSocket()

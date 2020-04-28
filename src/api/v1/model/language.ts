@@ -3,8 +3,8 @@
 const { promisify } = require("util");
 
 import Database from '../../../database';
-import { LangModelType } from './model';
-import { Service } from '../service/service';
+import { ModelDeclare } from './model';
+import { ServiceDeclare } from '../service/service';
 
 const redis = Database.redis.redis;
 const mongoose = Database.mongoose.Mongoose;
@@ -18,7 +18,7 @@ const LangModel = initLanguageModel(tableNameMain);
 
 function initLangConfigModel(tableName_config: string) {
     const schema = { langs: Array };
-    const LangConfigModel = mongoose.model<LangModelType.LangConfigModel>(tableName_config, new Schema(schema));
+    const LangConfigModel = mongoose.model<ModelDeclare.LangConfigModel>(tableName_config, new Schema(schema));
     return LangConfigModel;
 }
 
@@ -27,27 +27,8 @@ function initLanguageModel(tableName_main: string) {
         name: { type: String, unique: true },
         content: { type: Schema.Types.Mixed }
     };
-
-    // const result = await LangConfigModel.findOne({}, '-_id langs');
-    // if (result) {
-    //     // @ts-ignore
-    //     const langs: Array<any> = Array.from(new Set(result.langs));
-    //     for (let index = 0; index < langs.length; index++) {
-    //         const element = langs[index];
-    //         schema[element] = String;
-    //     }
-    // }
-
-    const LangModel = mongoose.model<LangModelType.LangModel>(tableName_main, new Schema(schema));
+    const LangModel = mongoose.model<ModelDeclare.LangModel>(tableName_main, new Schema(schema));
     return LangModel;
-}
-
-
-function TEST(data?: any) {
-    const keysAsync = promisify(redis.keys).bind(redis);
-    const getAsync = promisify(redis.get).bind(redis);
-    const typeAsync = promisify(redis.type).bind(redis);
-    return keysAsync('*')
 }
 
 function readLanguageList() {
@@ -68,11 +49,6 @@ function updateLanguageByPushing(data: { lang: string; }) {
     return LangConfigModel.findOneAndUpdate({}, { $addToSet: { langs: data.lang } });
 }
 
-
-function readWordExist(data) {
-
-}
-
 function readWordsInName(data: Array<string>) {
     return LangModel.find({ name: { $in: data } }, '-_id name');
 }
@@ -81,11 +57,11 @@ function readWordsNotInName(data: Array<string>) {
     return LangModel.find({ name: { $nin: data } }, '-_id name');
 }
 
-function insertWords(data: Array<Service.wordFormat>) {
+function insertWords(data: Array<ServiceDeclare.wordFormat>) {
     return LangModel.insertMany(data);
 }
 
-function updateWords(data: Array<Service.wordFormat>) {
+function updateWords(data: Array<ServiceDeclare.wordFormat>) {
     const bulkOps = data.map(value => ({
         updateOne: {
             filter: { name: value.name },
@@ -133,7 +109,6 @@ function r_setWordHash(data: {name: string,content: {[p: string]: string}}) {
 }
 
 export default {
-    TEST,
     initLanguageModel,
     readLanguageList,
     readWordsData,

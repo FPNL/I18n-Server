@@ -1,7 +1,7 @@
 import Dotenv = require('dotenv');
 import Path = require('path');
 
-import { Config } from './config';
+import { ConfigDeclare } from './config';
 
 Dotenv.config({ path: Path.join('.env') });
 
@@ -17,6 +17,9 @@ const {
   REDIS_HOST,
   SESSION_SECRET,
   SESSION_MAX_AGE,
+  SESSION_RESAVE,
+  SESSION_SAVE_UNINITIALIZED,
+  BCRYPT_SALT_ROUNDS,
 } = process.env;
 
 export default ({
@@ -31,4 +34,7 @@ export default ({
   REDIS_HOST,
   SESSION_SECRET,
   SESSION_MAX_AGE,
-} as Config.StringEnv);
+  SESSION_RESAVE,
+  SESSION_SAVE_UNINITIALIZED,
+  BCRYPT_SALT_ROUNDS,
+} as ConfigDeclare.StringEnv);

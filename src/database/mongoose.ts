@@ -1,11 +1,11 @@
 import Mongoose = require('mongoose');
 
-import Config from '../config';
+import config from '../config';
 
-console.log(Config.MONGO_DB_URI + Config.MONGO_DB_DATABASE);
+console.log(config.MONGO_DB_URI + config.MONGO_DB_DATABASE);
 
 
-Mongoose.connect(Config.MONGO_DB_URI + Config.MONGO_DB_DATABASE,
+Mongoose.connect(config.MONGO_DB_URI + config.MONGO_DB_DATABASE,
     {
         useNewUrlParser: true,
         useUnifiedTopology: true,

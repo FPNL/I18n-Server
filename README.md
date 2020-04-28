@@ -1,3 +1,14 @@
+<!--
+    TODO
+    1. logger
+    2. language/nativeLang
+    3. 權限 使用 TDD or BDD 方式
+    4. ts 編譯問題
+    5. CI/CD
+    6. WebSocket
+    7. 限制 IP
+-->
+
 ### 引用規則
 使用 lib 盡量用 import package = require('third-party-lib');
 引用內部 import insideVariable from '../path/to/folder';

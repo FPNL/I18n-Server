@@ -1,4 +1,4 @@
-export namespace Service {
+export namespace ServiceDeclare {
   export type wordName = string
   export interface wordContent {
     [langName: string]: string | number;

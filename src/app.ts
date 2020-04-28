@@ -35,8 +35,8 @@ app.use(CookieParser());
 
 app.use(Session({
   secret: config.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
+  resave: Boolean(config.SESSION_RESAVE),
+  saveUninitialized: Boolean(config.SESSION_SAVE_UNINITIALIZED),
   store: new MongoStore({
     mongooseConnection: database.mongoose.Mongoose.connection
   })

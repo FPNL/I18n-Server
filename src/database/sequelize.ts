@@ -1,12 +1,12 @@
 import Sequelize = require('sequelize');
 
-import Config from '../config';
+import config from '../config';
 
 // let sequelize = {};
 
-const sequelize = new Sequelize.Sequelize(Config.DATABASE, Config.USERNAME, Config.PASSWORD, {
-    host: Config.HOST,
-    dialect: Config.DATABASE_TYPE,
+const sequelize = new Sequelize.Sequelize(config.DATABASE, config.USERNAME, config.PASSWORD, {
+    host: config.HOST,
+    dialect: config.DATABASE_TYPE,
     // The `timestamps` field specify whether or not the `createdAt` and `updatedAt` fields will be created.
     // This was true by default, but now is false by default
     define: { timestamps: false }

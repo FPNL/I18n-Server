@@ -1,8 +1,8 @@
 import Mongodb = require('mongodb');
 
-import Config from '../config';
+import config from '../config';
 
-const client = new Mongodb.MongoClient(Config.MONGO_DB_URI, {useNewUrlParser: true,  useUnifiedTopology: true });
+const client = new Mongodb.MongoClient(config.MONGO_DB_URI, {useNewUrlParser: true,  useUnifiedTopology: true });
 
 async function run() {
     try {

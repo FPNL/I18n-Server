@@ -1,12 +1,13 @@
 import Express = require('express');
 
-import User from './user';
-import Lang from './language';
-import {isAuthByPassport} from '../controller/auth';
+import user from './user';
+import lang from './language';
+import { isAuthByPassport } from '../controller/auth';
+
 const Router_v1 = Express.Router();
 
 /* GET home page. */
-Router_v1.use('/user', User);
-Router_v1.use('/language', isAuthByPassport, Lang);
+Router_v1.use('/user', user);
+Router_v1.use('/language', isAuthByPassport, lang);
 
 export default Router_v1;
