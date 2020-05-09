@@ -233,6 +233,49 @@ async function deleteLangHandler(req: Express.Request): Promise<ControllerDeclar
     return { status: e.HttpStatus.OK, result: true };
 }
 
+async function getNativeLanguage(): Promise<ControllerDeclare.typicalResponse>  {
+    try {
+        // 檢查權限 -> 給資料
+        const currentLang = await service.Lang.getNativeLanguage();
+        if (currentLang) {
+            return { status: e.HttpStatus.OK, result: currentLang };
+        }
+    } catch (error) {
+        console.error("deleteLangHandler 錯誤 : ", error);
+        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+    }
+    return { status: e.HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false };
+}
+
+async function updateNativeLang(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
+    try {
+        // value validation -> check if it exist in list -> not same update
+        const reqBodyData = <{lang: string}>req.body;
+
+        // 限定在 'a-Z', '-'
+        let [error, validationErrorCode] = await service.Lang.checkLangColumnValidation(req);
+        if (error) {
+            return { status: validationErrorCode, result: false };
+        }
+
+        if (!await service.Lang.checkLangHasExist(reqBodyData) ) {
+            return { status: e.HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false}
+        }
+
+        const currentLang = await service.Lang.getNativeLanguage();
+        if (currentLang === reqBodyData.lang) {
+            return { status: e.HttpStatus.OK, result: true };
+        }
+
+        await service.Lang.updateNativeLang(reqBodyData);
+
+    } catch (error) {
+        console.error("updateNativeLang 錯誤 : ", error);
+        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+    }
+    return { status: e.HttpStatus.OK, result: true };
+}
+
 export default {
     getLanguageListHandler,
     getWordsContentHandler,
@@ -241,5 +284,7 @@ export default {
     alterWordsHandler,
     deleteWordsHandler,
     deleteLangHandler,
+    updateNativeLang,
+    getNativeLanguage,
     r_getLangListHandler
 };

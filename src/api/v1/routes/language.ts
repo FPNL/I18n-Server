@@ -54,8 +54,14 @@ router.delete('/deleteWords', async (req, res, next): Promise<void> => {
     // const RedisDelete();
 });
 
+router.get('/nativeLang', async (req, res, next) => {
+    const responseData = await controller.Lang.getNativeLanguage();
+    util.routerResponseFormatter(res, responseData);
+})
+
 router.put('/nativeLang', async (req, res, next) => {
-    res.send("尚未建造...");
+    const responseData = await controller.Lang.updateNativeLang(req);
+    util.routerResponseFormatter(res, responseData);
 })
 
 export default router;

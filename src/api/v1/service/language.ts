@@ -212,6 +212,15 @@ async function checkKeyExist(keyName: string): Promise<boolean> {
     return await model.Lang.r_getKeyExist(keyName);
 }
 
+async function getNativeLanguage(): Promise<string | undefined>  {
+    const result = await model.Lang.readNativeLang();
+    return result?.nativeLang;
+}
+
+async function updateNativeLang(reqBodyData: { lang: string; }) {
+    return await model.Lang.updateNativeLang(reqBodyData.lang);
+}
+
 export default {
     getLangList,
     getLimitWordsData,
@@ -233,4 +242,6 @@ export default {
     getLangListFromRedis,
     removeLangListFromRedis,
     checkKeyExist,
+    getNativeLanguage,
+    updateNativeLang,
 };

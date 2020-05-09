@@ -17,8 +17,14 @@ const LangConfigModel = initLangConfigModel(tableNameConfig);
 const LangModel = initLanguageModel(tableNameMain);
 
 function initLangConfigModel(tableName_config: string) {
-    const schema = { langs: Array };
-    const LangConfigModel = mongoose.model<ModelDeclare.LangConfigModel>(tableName_config, new Schema(schema));
+    const schema = { langs: Array, nativeLang: String };
+    const options = {
+        timestamps: {
+            createdAt: 'time_create',
+            updatedAt: 'time_update'
+        }
+    };
+    const LangConfigModel = mongoose.model<ModelDeclare.LangConfigModel>(tableName_config, new Schema(schema, options));
     return LangConfigModel;
 }
 
@@ -27,13 +33,18 @@ function initLanguageModel(tableName_main: string) {
         name: { type: String, unique: true },
         content: { type: Schema.Types.Mixed }
     };
-    const LangModel = mongoose.model<ModelDeclare.LangModel>(tableName_main, new Schema(schema));
+    const options = {
+        timestamps: {
+            createdAt: 'time_create',
+            updatedAt: 'time_update'
+        }
+    };
+    const LangModel = mongoose.model<ModelDeclare.LangModel>(tableName_main, new Schema(schema, options));
     return LangModel;
 }
 
 function readLanguageList() {
-    const result = LangConfigModel.findOne({}, '-_id langs')
-    return result;
+    return LangConfigModel.findOne({}, '-_id langs')
 }
 
 
@@ -79,6 +90,14 @@ function deleteLang(data: string) {
     return LangConfigModel.findOneAndUpdate({}, { $pull: { langs: data } });
 }
 
+function readNativeLang() {
+    return LangConfigModel.findOne({}, '-_id nativeLang');
+}
+
+function updateNativeLang(data: string) {
+    return LangConfigModel.updateOne({}, { nativeLang: data });
+}
+
 function r_setLangSet(data: string[]|string): boolean {
     const keyName = 'langs';
     return redis.sadd(keyName, data);
@@ -119,6 +138,8 @@ export default {
     updateWords,
     deleteWords,
     deleteLang,
+    readNativeLang,
+    updateNativeLang,
     // readWordExist,
     r_setLangSet,
     r_getLangSet,

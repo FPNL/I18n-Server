@@ -5,6 +5,7 @@ import { ServiceDeclare } from '../service/service';
 export namespace ModelDeclare {
   export interface LangConfigModel extends Mongoose.Document {
     langs: Array<string>;
+    nativeLang: string;
   }
   export interface LangModel extends Mongoose.Document {
     name: ServiceDeclare.wordName;

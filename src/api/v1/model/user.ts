@@ -3,6 +3,21 @@ import Sequelize from 'sequelize';
 import database from '../../../database';
 
 //   FIXME 增加 validation
+
+/*
+CREATE TABLE `users` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `account` char(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `nickname` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `character` enum('admin','manager','adviser') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'adviser',
+  `owner` enum('yes','no') COLLATE utf8mb4_unicode_ci DEFAULT 'no',
+  `timeCreate` datetime DEFAULT CURRENT_TIMESTAMP,
+  `timeUpdate` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `account` (`account`)
+) ENGINE = InnoDB AUTO_INCREMENT = 17 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci
+*/
 class User extends Sequelize.Model {
     public readonly id!: string;
     public readonly account!: string;
