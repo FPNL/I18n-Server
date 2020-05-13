@@ -1,7 +1,9 @@
-import Express = require('express');
-
-import e from '../../../package/e';
-import service from '../service';
+// Package
+import Express from 'express';
+// Module
+import { HttpStatus, HttpStatusMessage } from '../../../package/httpStatus';
+import * as langService from '../service/language';
+// Typing
 import { ControllerDeclare } from './controller';
 import { ServiceDeclare } from '../service/service';
 
@@ -9,16 +11,16 @@ import { ServiceDeclare } from '../service/service';
 async function getLanguageListHandler(): Promise<ControllerDeclare.typicalResponse> {
     // router 有權限檢查的 middleware  -> 給資料.
     try {
-        const result = await service.Lang.getLangList();
+        const result = await langService.getLangList();
         if (result /*&& await Service.Lang.checkResponseLangColumnFormat(result)*/) {
-            return { status: e.HttpStatus.OK, result };
+            return { status: HttpStatus.OK, result };
         }
 
     } catch (error) {
         console.error("getLanguageListHandler 錯誤", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false}
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.NO_DATA, result: false };
+    return { status: HttpStatus.NO_DATA, result: false };
 }
 
 async function r_getLangListHandler(): Promise<ControllerDeclare.typicalResponse> {
@@ -26,40 +28,40 @@ async function r_getLangListHandler(): Promise<ControllerDeclare.typicalResponse
     // router 有權限檢查的 middleware  -> 給資料.
     try {
         const keyName = 'langs';
-        const hasKey = await service.Lang.checkKeyExist(keyName);
+        const hasKey = await langService.checkKeyExistFromRedis(keyName);
         if (!hasKey) {
-            return { status: e.HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
+            return { status: HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
         }
 
-        const result = await service.Lang.getLangListFromRedis();
+        const result = await langService.getLangListFromRedis();
         if (result.length /*&& await Service.Lang.checkResponseLangColumnFormat(result)*/) {
-            return { status: e.HttpStatus.OK, result };
+            return { status: HttpStatus.OK, result };
         }
 
     } catch (error) {
         console.error("getLanguageListHandler 錯誤", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false}
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.NO_DATA, result: false };
+    return { status: HttpStatus.NO_DATA, result: false };
 }
 
 
 async function getWordsContentHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // router 有權限檢查的 middleware  -> 從資料庫取得資料 -> ?檢查返回的資料格式? -> 給資料
     try {
-        const reqParam = <{ limit?: string; page?: string;}>req.params;
+        const reqParam = <{ limit?: string; page?: string; }>req.params;
 
-        const result = await service.Lang.getLimitWordsData(reqParam);
+        const result = await langService.getLimitWordsData(reqParam);
 
         if (result) {
-            return { status: e.HttpStatus.OK, result };
+            return { status: HttpStatus.OK, result };
         }
 
     } catch (error) {
         console.error("createWordsHandler 錯誤", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.NO_DATA, result: false };
+    return { status: HttpStatus.NO_DATA, result: false };
 }
 
 
@@ -69,24 +71,27 @@ async function addLanguageHandler(req: Express.Request): Promise<ControllerDecla
         const reqBodyData = <{ lang: string; }>req.body;
 
         // 限定在 'a-Z', '-'
-        let [error, validationErrorCode] = await service.Lang.checkLangColumnValidation(req);
+        let [error, validationErrorCode] = await langService.checkLangColumnValidation(req);
         if (error) {
             return { status: validationErrorCode, result: false };
         }
 
-        if (await service.Lang.checkLangHasExist(reqBodyData) ) {
-            return { status: e.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE, result: false}
+        if (await langService.checkLangHasExist(reqBodyData)) {
+            return { status: HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE, result: false };
         }
 
-        await service.Lang.addOneLangToDB(reqBodyData);
+        const result = await langService.addOneLangToDB(reqBodyData);
+        if (!result) {
+            throw new Error("新增語言至資料庫失敗");
+        }
 
-        await service.Lang.setLangListIntoRedis(reqBodyData);
+        await langService.setLangListIntoRedis(reqBodyData);
 
     } catch (error) {
         console.error("addLanguageHandler 錯誤", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.OK, result: true };
+    return { status: HttpStatus.OK, result: true };
 }
 
 
@@ -96,28 +101,28 @@ async function addWordsHandler(req: Express.Request): Promise<ControllerDeclare.
         const reqBodyData = <ServiceDeclare.wordsFormat>req.body;
 
         // 驗證 name 全英文分大小寫+數字 content key 錯誤
-        let [error, validationErrorCode] = await service.Lang.checkWordsValidation(req);
-        if(error) {
+        let [error, validationErrorCode] = await langService.checkWordsValidation(req);
+        if (error) {
             return { status: validationErrorCode, result: false };
         }
 
         // 確認是否有符合語言名單 若是 input { name, en, cht } 可是lang list 只有 { name, en }，
         // 是不是代表客端錯誤或是增加語言欄位的功能發生錯誤？
-        let [errorNotMatch, wrongLang] = await service.Lang.checkWordsDataMatchLangs(reqBodyData);
+        let [errorNotMatch, wrongLang] = await langService.checkWordsDataMatchLangs(reqBodyData);
         if (errorNotMatch) {
-            return { status: e.HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: wrongLang };
+            return { status: HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: wrongLang };
         }
 
-        const [isInsideDataRepeat, repeatDataInReqBody] = service.Lang.checkRepeatInsideReqBodyData(reqBodyData);
+        const [isInsideDataRepeat, repeatDataInReqBody] = langService.checkRepeatInsideReqBodyData(reqBodyData);
         if (isInsideDataRepeat) {
-            return { status: e.HttpStatus.WARNING_REPEAT_WORD, result: repeatDataInReqBody }
+            return { status: HttpStatus.WARNING_REPEAT_WORD, result: repeatDataInReqBody };
         }
 
         // 確認內容重複，並把跟資料庫重複的工作交給資料庫來解決
-        const [hasRepeat, repeatData] = await service.Lang.checkWordsExistInDB(reqBodyData);
+        const [hasRepeat, repeatData] = await langService.checkWordsExistInDB(reqBodyData);
         // 重複不行插入，並發出警告
         if (hasRepeat) {
-            return { status: e.HttpStatus.WARNING_REPEAT_WORD, result: repeatData }
+            return { status: HttpStatus.WARNING_REPEAT_WORD, result: repeatData };
         }
 
         // 待定
@@ -126,16 +131,16 @@ async function addWordsHandler(req: Express.Request): Promise<ControllerDeclare.
         //     throw ErrorPackage.HttpStatus.ERROR_DATA_FORMAT;
         // }
 
-        error = await service.Lang.insertWordsIntoDB(reqBodyData);
+        error = await langService.insertWordsIntoDB(reqBodyData);
         if (error) {
-            throw e.HttpStatusMessage.get(e.HttpStatus.WARNING_REPEAT_WORD);
+            throw HttpStatusMessage.get(HttpStatus.WARNING_REPEAT_WORD);
         }
 
     } catch (error) {
         console.error("createWordsHandler 錯誤 : ", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false }
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.OK, result: true };
+    return { status: HttpStatus.OK, result: true };
 }
 
 async function alterWordsHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
@@ -144,139 +149,171 @@ async function alterWordsHandler(req: Express.Request): Promise<ControllerDeclar
     try {
         const reqBodyData = <ServiceDeclare.wordsFormat>req.body;
 
-        let [error, validationErrorCode] = await service.Lang.checkWordsValidation(req);
-        if(error) {
+        let [error, validationErrorCode] = await langService.checkWordsValidation(req);
+        if (error) {
             return { status: validationErrorCode, result: false };
         }
 
-        const [errorNotMatch, wrongLang] = await service.Lang.checkWordsDataMatchLangs(reqBodyData);
+        const [errorNotMatch, wrongLang] = await langService.checkWordsDataMatchLangs(reqBodyData);
         if (errorNotMatch) {
-            return { status: e.HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: wrongLang };
+            return { status: HttpStatus.ERROR_LANG_COLUMN_OVERFLOW, result: wrongLang };
         }
 
-        const [isInsideDataRepeat, repeatDataInReqBody] = service.Lang.checkRepeatInsideReqBodyData(reqBodyData);
+        const [isInsideDataRepeat, repeatDataInReqBody] = langService.checkRepeatInsideReqBodyData(reqBodyData);
         if (isInsideDataRepeat) {
-            return { status: e.HttpStatus.WARNING_REPEAT_WORD, result: repeatDataInReqBody }
+            return { status: HttpStatus.WARNING_REPEAT_WORD, result: repeatDataInReqBody };
         }
 
-        const [isNotExist, ghostData] = await service.Lang.checkWordsNotExistInDB(reqBodyData);
+        const [isNotExist, ghostData] = await langService.checkWordsNotExistInDB(reqBodyData);
         if (isNotExist) {
-            return { status: e.HttpStatus.ERROR_NOT_EXIST_WORD, result: ghostData }
+            return { status: HttpStatus.ERROR_NOT_EXIST_WORD, result: ghostData };
         }
 
-        error = await service.Lang.updateWordsIntoDB(reqBodyData);
+        error = await langService.updateWordsIntoDB(reqBodyData);
         if (error) {
-            throw e.HttpStatusMessage.get(e.HttpStatus.WARNING_REPEAT_WORD);
+            throw HttpStatusMessage.get(HttpStatus.WARNING_REPEAT_WORD);
         }
 
     } catch (error) {
         console.error("alterWordsHandler 錯誤 : ", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false }
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.OK, result: true };
+    return { status: HttpStatus.OK, result: true };
 }
 
 async function deleteWordsHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // delete multiple data 傳來格式應該為 {"data": ["name1", "name2"] } -> name validation -> check exist -> delete data
     try {
-        const reqBodyData = <{data: Array<string>}>req.body;
+        const reqBodyData = <{ data: Array<string>; }>req.body;
         // 驗證 name 全英文分大小寫+數字
-        let [error, validationErrorCode] = await service.Lang.checkNameValidation(req);
-        if(error) {
+        let [error, validationErrorCode] = await langService.checkNameValidation(req);
+        if (error) {
             return { status: validationErrorCode, result: false };
         }
 
-        const [isNotExist, ghostData] = await service.Lang.checkWordsNotExistInDB(reqBodyData);
+        const [isNotExist, ghostData] = await langService.checkWordsNotExistInDB(reqBodyData);
         if (isNotExist) {
-            return { status: e.HttpStatus.ERROR_NOT_EXIST_WORD, result: ghostData }
+            return { status: HttpStatus.ERROR_NOT_EXIST_WORD, result: ghostData };
         }
 
-        error = await service.Lang.deleteWordsFromDB(reqBodyData);
+        error = await langService.deleteWordsFromDB(reqBodyData);
         if (error) {
-            throw e.HttpStatusMessage.get(e.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw HttpStatusMessage.get(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
     } catch (error) {
         console.error("deleteWordsHandler 錯誤 : ", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.OK, result: true };
+    return { status: HttpStatus.OK, result: true };
 }
 
 async function deleteLangHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // validation is string alphanumberic -> check config exist -> delete
     try {
-        const reqBodyData = <{lang: string}>req.body;
+        const reqBodyData = <{ lang: string; }>req.body;
 
         // 限定在 'a-Z', '-'
-        let [error, validationErrorCode] = await service.Lang.checkLangColumnValidation(req);
+        let [error, validationErrorCode] = await langService.checkLangColumnValidation(req);
         if (error) {
             return { status: validationErrorCode, result: false };
         }
 
-        if (!await service.Lang.checkLangHasExist(reqBodyData) ) {
-            return { status: e.HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false}
+        const langList = await langService.getLangList();
+        if (!langList) {
+            return { status: HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false };
+        } else if (langList.length === 1) {
+            return { status: HttpStatus.WARNING_LANG_AT_LEAST_ONE, result: false };
         }
 
-        error = await service.Lang.deleteLangFromDB(reqBodyData);
+        if (!await langService.checkLangHasExist(reqBodyData, langList)) {
+            return { status: HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false };
+        }
+
+        error = await langService.deleteLangFromDB(reqBodyData);
         if (error) {
-            throw e.HttpStatusMessage.get(e.HttpStatus.INTERNAL_SERVER_ERROR);
+            throw HttpStatusMessage.get(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        await service.Lang.removeLangListFromRedis(reqBodyData);
+        await langService.removeLangListFromRedis(reqBodyData);
 
     } catch (error) {
         console.error("deleteLangHandler 錯誤 : ", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
 
-    return { status: e.HttpStatus.OK, result: true };
+    return { status: HttpStatus.OK, result: true };
 }
 
-async function getNativeLanguage(): Promise<ControllerDeclare.typicalResponse>  {
+async function getNativeLanguage(): Promise<ControllerDeclare.typicalResponse> {
     try {
         // 檢查權限 -> 給資料
-        const currentLang = await service.Lang.getNativeLanguage();
-        if (currentLang) {
-            return { status: e.HttpStatus.OK, result: currentLang };
+        const currentLang = await langService.getNativeLanguage();
+        if (!currentLang) {
+            return { status: HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false };
         }
+
+        await langService.setNativeLangIntoRedis({ lang: currentLang });
+
+        return { status: HttpStatus.OK, result: currentLang };
     } catch (error) {
         console.error("deleteLangHandler 錯誤 : ", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false };
 }
 
 async function updateNativeLang(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     try {
         // value validation -> check if it exist in list -> not same update
-        const reqBodyData = <{lang: string}>req.body;
+        const reqBodyData = <{ lang: string; }>req.body;
 
         // 限定在 'a-Z', '-'
-        let [error, validationErrorCode] = await service.Lang.checkLangColumnValidation(req);
+        let [error, validationErrorCode] = await langService.checkLangColumnValidation(req);
         if (error) {
             return { status: validationErrorCode, result: false };
         }
 
-        if (!await service.Lang.checkLangHasExist(reqBodyData) ) {
-            return { status: e.HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false}
+        if (!await langService.checkLangHasExist(reqBodyData)) {
+            return { status: HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false };
         }
 
-        const currentLang = await service.Lang.getNativeLanguage();
+        const currentLang = await langService.getNativeLanguage();
         if (currentLang === reqBodyData.lang) {
-            return { status: e.HttpStatus.OK, result: true };
+            return { status: HttpStatus.OK, result: true };
         }
 
-        await service.Lang.updateNativeLang(reqBodyData);
+        await langService.updateNativeLang(reqBodyData);
+
+        await langService.setNativeLangIntoRedis(reqBodyData);
 
     } catch (error) {
         console.error("updateNativeLang 錯誤 : ", error);
-        return { status: e.HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
-    return { status: e.HttpStatus.OK, result: true };
+    return { status: HttpStatus.OK, result: true };
 }
 
-export default {
+async function r_getNativeLangHandler() {
+    try {
+        const keyName = 'nativeLang';
+        const hasKey = await langService.checkKeyExistFromRedis(keyName);
+        if (!hasKey) {
+            return { status: HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
+        }
+
+        const result = await langService.getNativeLangFromRedis();
+        if (result) {
+            return { status: HttpStatus.OK, result };
+        }
+    } catch (error) {
+        console.error("r_getNativeLangHandler 錯誤", error);
+        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+    }
+    return { status: HttpStatus.NO_DATA, result: false };
+
+}
+
+export {
     getLanguageListHandler,
     getWordsContentHandler,
     addLanguageHandler,
@@ -286,5 +323,6 @@ export default {
     deleteLangHandler,
     updateNativeLang,
     getNativeLanguage,
-    r_getLangListHandler
+    r_getLangListHandler,
+    r_getNativeLangHandler
 };

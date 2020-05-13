@@ -1,13 +1,15 @@
-import Validator = require('express-validator');
-import Express = require('express');
-
-import e from '../../../package/e';
+// Package
+import Validator from 'express-validator';
+import Express from 'express';
+// Module
+import { HttpStatus, HttpStatusMessage } from '../../../package/httpStatus';
+// Typing
 import { ControllerDeclare } from '../controller/controller';
 
 function routerResponseFormatter(res: Express.Response, responseData: ControllerDeclare.typicalResponse): void {
-    const message = e.HttpStatusMessage.get(responseData.status);
+    const message = HttpStatusMessage.get(responseData.status);
 
-    if(responseData.status > 600) {
+    if (responseData.status > 600) {
         responseData.status = 400;
     }
 
@@ -18,13 +20,13 @@ function routerResponseFormatter(res: Express.Response, responseData: Controller
 }
 
 
-async function getDataFromModel(modelFn: Function, data: any): Promise<{ result: Promise<Function> }> {
+async function getDataFromModel(modelFn: Function, data: any): Promise<{ result: Promise<Function>; }> {
     try {
         const result = await modelFn(data);
         return { result };
     } catch (e) {
-        console.error(" ＝＝＝ getDataFromModel 錯誤 ＝＝＝")
-        let status = e.HttpStatus.INTERNAL_SERVER_ERROR;
+        console.error(" ＝＝＝ getDataFromModel 錯誤 ＝＝＝");
+        let status = HttpStatus.INTERNAL_SERVER_ERROR;
 
         if (e.name === 'SequelizeValidationError') {
             // TODO 低 紀錄錯誤
@@ -41,11 +43,11 @@ async function validationErrorHandler(req: Express.Request): Promise<[boolean, s
     const errors = await Validator.validationResult(req);
     let result = '';
     const isError = !errors.isEmpty();
-    if ( isError ) {
+    if (isError) {
         console.log("資料驗證錯誤", errors);
         result = Object.keys(errors.mapped())[0];
     }
-    return [isError, result]
+    return [isError, result];
 }
 
-export default { routerResponseFormatter, getDataFromModel, validationErrorHandler};
+export { routerResponseFormatter, getDataFromModel, validationErrorHandler };

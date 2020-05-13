@@ -4,11 +4,13 @@
  * Module dependencies.
  */
 
-import debug = require('debug');
-import http = require('http');
+import debug from 'debug';
+import http from 'http';
 
 import app from '../src/app';
-
+import { m_connectionTest } from '../src/database/mongoose';
+import { s_connectionTest } from '../src/database/sequelize';
+import { r_connectionTest } from '../src/database/redis';
 debug('i18n-server:server');
 /**
  * Get port from environment and store in Express.
@@ -26,11 +28,14 @@ var server = http.createServer(app);
 /**
  * Listen on provided port, on all network interfaces.
  */
-
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
-
+(async () => {
+  await s_connectionTest();
+  await r_connectionTest();
+  await m_connectionTest();
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+})();
 /**
  * Normalize a port into a number, string, or false.
  */

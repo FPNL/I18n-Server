@@ -1,13 +1,19 @@
+// 套件
 // import Mongoose = require('mongoose');
 // import Redis =  require('redis');
-const { promisify } = require("util");
+// import { promisify } from "util";
+import { promisify } from "util";
 
-import Database from '../../../database';
+// 模組
+import { m_connect } from '../../../database/mongoose';
+import { r_connect } from '../../../database/redis';
+
+// 型別
 import { ModelDeclare } from './model';
 import { ServiceDeclare } from '../service/service';
 
-const redis = Database.redis.redis;
-const mongoose = Database.mongoose.Mongoose;
+const redis = r_connect();
+const mongoose = m_connect();
 const Schema = mongoose.Schema;
 
 const tableNameConfig = 'config';
@@ -22,7 +28,8 @@ function initLangConfigModel(tableName_config: string) {
         timestamps: {
             createdAt: 'time_create',
             updatedAt: 'time_update'
-        }
+        },
+        autoCreate: true,
     };
     const LangConfigModel = mongoose.model<ModelDeclare.LangConfigModel>(tableName_config, new Schema(schema, options));
     return LangConfigModel;
@@ -31,24 +38,25 @@ function initLangConfigModel(tableName_config: string) {
 function initLanguageModel(tableName_main: string) {
     const schema = {
         name: { type: String, unique: true },
-        content: { type: Schema.Types.Mixed }
+        content: { type: Schema.Types.Mixed },
     };
     const options = {
         timestamps: {
             createdAt: 'time_create',
             updatedAt: 'time_update'
-        }
+        },
+        autoCreate: true,
     };
     const LangModel = mongoose.model<ModelDeclare.LangModel>(tableName_main, new Schema(schema, options));
     return LangModel;
 }
 
 function readLanguageList() {
-    return LangConfigModel.findOne({}, '-_id langs')
+    return LangConfigModel.findOne({}, '-_id langs');
 }
 
 
-function readWordsData(data, params: { limit: number, skip: number }) {
+function readWordsData(data, params: { limit: number, skip: number; }) {
     let { limit, skip } = params;
     if (limit > 50) {
         limit = 50;
@@ -57,7 +65,13 @@ function readWordsData(data, params: { limit: number, skip: number }) {
 }
 
 function updateLanguageByPushing(data: { lang: string; }) {
-    return LangConfigModel.findOneAndUpdate({}, { $addToSet: { langs: data.lang } });
+    return LangConfigModel.findOneAndUpdate({},
+        { $addToSet: { langs: data.lang } },
+        {
+            upsert: true,
+            new: true
+        },
+    );
 }
 
 function readWordsInName(data: Array<string>) {
@@ -98,7 +112,7 @@ function updateNativeLang(data: string) {
     return LangConfigModel.updateOne({}, { nativeLang: data });
 }
 
-function r_setLangSet(data: string[]|string): boolean {
+function r_setLangSet(data: string[] | string): boolean {
     const keyName = 'langs';
     return redis.sadd(keyName, data);
 
@@ -121,13 +135,25 @@ function r_getKeyExist(data: string): boolean {
     return keyExistAsync(data);
 }
 
-function r_setWordHash(data: {name: string,content: {[p: string]: string}}) {
-    const name = data.name;
-    const hsetAsync = promisify(redis.hset).bind(redis)
-    return hsetAsync(name, data.content);
+function r_setNativeLang(lang: string) {
+    const keyName = "nativeLang";
+    const setAsync = promisify(redis.set).bind(redis);
+    return setAsync(keyName, lang);
 }
 
-export default {
+function r_getNativeLang() {
+    const keyName = "nativeLang";
+    const getAsync = promisify(redis.get).bind(redis);
+    return getAsync(keyName);
+}
+
+function r_setWordHash(data: { name: string, content: { [p: string]: string; }; }) {
+    // const name = data.name;
+    // const hsetAsync = promisify(redis.hset).bind(redis);
+    // return hsetAsync(name, data.content);
+}
+
+export {
     initLanguageModel,
     readLanguageList,
     readWordsData,
@@ -145,4 +171,6 @@ export default {
     r_getLangSet,
     r_removeLangSet,
     r_getKeyExist,
+    r_setNativeLang,
+    r_getNativeLang,
 };

@@ -1,59 +1,70 @@
 // 套件
-import Express = require('express');
-import CreateError = require('http-errors');
-import CookieParser  = require( 'cookie-parser');
-import Session = require('express-session');
-const MongoStore = require('connect-mongo')(Session);
-import Logger  = require( 'morgan');
-import Path = require('path');
+import Express from 'express';
+import CreateError from 'http-errors';
+import CookieParser from 'cookie-parser';
+import Session from 'express-session';
+import ConnectMongo from 'connect-mongo';
+import Logger from 'morgan';
+import Path from 'path';
+import Mongoose from 'mongoose';
+import Fs from 'fs';
+// import Rfs from 'rotating-file-stream';
+const Rfs = require('rotating-file-stream');
+import Passport from 'passport';
+
 // 模組
-import apiRouter from './api/v1';
-import database from './database';
-import config from './config';
-import authGuard from './package/authGuard';
-import globalTypings from './typings';
+import * as config from './config';
+import apiRouter_v1 from './api/v1';
+// import authGuard from './package/passport';
+
+// 型別
+import globalTypings from './global';
 
 const app = Express();
-
-database.sequelize.sequelizeConnectionTest()
-database.mongoose.mongooseConnectionTest();
-database.redis.redisConnectionTest();
-// Database.mongo.run().catch(console.dir);
 
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'pug');
 
-// const fs = require('fs');
-// var accessLogStream = fs.createWriteStream(path.join(__dirname, 'access.log'), {flags: 'a'});
-// app.use(Logger('short', {stream: accessLogStream}));
+var accessLogStream = Rfs.createStream(
+  'access.log',
+  {
+    path: Path.join(__dirname, 'log'),
+    interval: '1d'
+  }
+);
 
-app.use(Logger('dev'));
+app.use(Logger('common', {
+  stream: accessLogStream,
+  // skip: () => config.ENVIRONMENT === 'dev',
+}));
+
 app.use(Express.json()); // application/json
 app.use(Express.urlencoded({ extended: false })); // parse application/x-www-form-urlencoded
 app.use(CookieParser());
 
+const MongoStore = ConnectMongo(Session);
 app.use(Session({
   secret: config.SESSION_SECRET,
   resave: Boolean(config.SESSION_RESAVE),
   saveUninitialized: Boolean(config.SESSION_SAVE_UNINITIALIZED),
   store: new MongoStore({
-    mongooseConnection: database.mongoose.Mongoose.connection
+    mongooseConnection: Mongoose.connection
   })
 }));
-app.use(authGuard.Passport.initialize());
-app.use(authGuard.Passport.session());
+app.use(Passport.initialize());
+app.use(Passport.session());
 // app.use(stylus.middleware(path.join(__dirname, 'public')));
 app.use('/', Express.static(Path.join(__dirname, 'public')));
-app.use('/api', apiRouter);
+app.use('/api/v1', apiRouter_v1);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(CreateError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   // 可看到 views/error 裡頭自帶參數 error ，從這段 code 可推斷 res.locals 是提供給樣板的變數
   // res.locals.message = err.message;
@@ -66,7 +77,7 @@ app.use(function(err, req, res, next) {
     .json({
       message: err.message,
       stack: err.stack
-    })
+    });
 });
 
 export default app;

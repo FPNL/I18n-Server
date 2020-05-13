@@ -1,4 +1,4 @@
-import Mongoose = require('mongoose');
+import Mongoose from 'mongoose';
 
 import { ServiceDeclare } from '../service/service';
 

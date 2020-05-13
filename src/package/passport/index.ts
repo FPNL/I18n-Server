@@ -1,8 +1,9 @@
-import Passport =  require('passport');
-import LocalStrategy = require('passport-local');
+import Passport from 'passport';
+import LocalStrategy from 'passport-local';
 
-import model from '../../api/v1/model';
-import controller from '../../api/v1/controller';
+import { UserModel } from '../../api/v1/model/user';
+import { loginHandler } from '../../api/v1/controller/user';
+
 
 Passport.serializeUser(function (user: any, done) {
   done(null, user.id);
@@ -10,7 +11,7 @@ Passport.serializeUser(function (user: any, done) {
 
 Passport.deserializeUser(async function (id: string, done) {
   try {
-    const user = await model.User.User.findByPk(id);
+    const user = await UserModel.findByPk(id);
     done(null, user);
   } catch (error) {
     done(error, false);
@@ -23,9 +24,9 @@ Passport.use(new LocalStrategy.Strategy(
     passReqToCallback: true,
   },
   async function (req, _account, _password, done) {
-    const [err, user] = await controller.User.loginHandler(req);
+    const [err, user] = await loginHandler(req);
     done(err, user);
   }
 ));
 
-export default { Passport };
+export default Passport;

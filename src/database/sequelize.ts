@@ -1,39 +1,33 @@
-import Sequelize = require('sequelize');
+import Sequelize from 'sequelize';
 
-import config from '../config';
+import * as config from '../config';
 
-// let sequelize = {};
+function s_connect() {
+    return new Sequelize.Sequelize(config.DATABASE, config.USERNAME, config.PASSWORD, {
+        host: config.HOST,
+        dialect: config.DATABASE_TYPE,
+        // The `timestamps` field specify whether or not the `createdAt` and `updatedAt` fields will be created.
+        // This was true by default, but now is false by default
+        define: { timestamps: false }
+    });
+}
 
-const sequelize = new Sequelize.Sequelize(config.DATABASE, config.USERNAME, config.PASSWORD, {
-    host: config.HOST,
-    dialect: config.DATABASE_TYPE,
-    // The `timestamps` field specify whether or not the `createdAt` and `updatedAt` fields will be created.
-    // This was true by default, but now is false by default
-    define: { timestamps: false }
-});
-
-// const connect = () => {
-//     sequelize = new Sequelize(Config.DATABASE, Config.USERNAME, Config.PASSWORD, {
-//         host: Config.HOST,
-//         dialect: Config.DATABASE_TYPE,
-//         define: { timestamps: false }
-//     });
-// }
-
-const sequelizeConnectionTest = async (): Promise<boolean> => {
+async function s_connectionTest(): Promise<boolean> {
     try {
-        console.log('Sequelize 連線中...');
+        console.log('Sequelize 測試連線中...');
+        const sequelize = await s_connect();
         await sequelize.authenticate();
-        console.log('Sequelize 連線成功 ! ');
+        await sequelize.close();
+        console.log('Sequelize 測試連線成功 ! ');
         return true;
     } catch (error) {
-        console.error('Sequelize 連接失敗 : ', error);
+        console.error('Sequelize 測試連接失敗 : ', error);
         return false;
     }
-}
+};
 
 // const define = () => {
 //     return sequelize.define;
 // }
 
-export default { sequelize, sequelizeConnectionTest };
+export { s_connect, s_connectionTest };

@@ -1,7 +1,5 @@
 <!--
     TODO
-    1. logger
-    2. language/nativeLang
     3. 權限 使用 TDD or BDD 方式
     4. ts 編譯問題
     5. CI/CD

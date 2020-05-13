@@ -1,5 +1,3 @@
-import { CustomHttpStatus } from './e';
-
 export default {
     OK: 200,
     NO_DATA: 204,
@@ -29,4 +27,5 @@ export default {
     WARNING_NOT_EXIST_KEY: 20414,
     WARNING_NO_CONTENT: 20415,
     ERROR_NOT_EXIST_NATIVE_LANG: 20216,
+    WARNING_LANG_AT_LEAST_ONE: 20417,
 };

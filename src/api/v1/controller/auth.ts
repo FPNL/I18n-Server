@@ -1,12 +1,14 @@
-import Express = require('express');
+import Express from 'express';
 
-import util from '../util';
-import e from '../../../package/e';
+import { routerResponseFormatter } from '../util';
+import { HttpStatus } from '../../../package/httpStatus';
 
-export function isAuthByPassport(req:Express.Request, res: Express.Response, next: Express.NextFunction) {
+function isAuthByPassport(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
   if (req.isAuthenticated()) {
     return next();
   }
-  const responseData= { status: e.HttpStatus.UNAUTHORIZED, result: false };
-  util.routerResponseFormatter(res, responseData);
+  const responseData = { status: HttpStatus.UNAUTHORIZED, result: false };
+  routerResponseFormatter(res, responseData);
 }
+
+export { isAuthByPassport };

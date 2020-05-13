@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 
-import database from '../../../database';
+import { s_connect } from '../../../database/sequelize';
 
 //   FIXME 增加 validation
 
@@ -18,7 +18,7 @@ CREATE TABLE `users` (
   UNIQUE KEY `account` (`account`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 17 DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci
 */
-class User extends Sequelize.Model {
+class UserModel extends Sequelize.Model {
     public readonly id!: string;
     public readonly account!: string;
     public password!: string;
@@ -33,7 +33,7 @@ class User extends Sequelize.Model {
     }
 }
 
-User.init({
+UserModel.init({
     account: {
         type: Sequelize.STRING,
         allowNull: false
@@ -55,21 +55,21 @@ User.init({
         allowNull: true
     },
 },
-{
-    tableName: 'users',
-    sequelize: database.sequelize.sequelize
-});
+    {
+        tableName: 'users',
+        sequelize: s_connect()
+    });
 
 function countUsers(data: { account: string; }) {
-    return User.count({ where: {account: data.account} });
+    return UserModel.count({ where: { account: data.account } });
 }
 
 async function findUser(data: { account: string; }) {
-    return User.findOne({ where: { account: data.account } });
+    return UserModel.findOne({ where: { account: data.account } });
 }
 
 function createUser(data: { account: string; password: string; nickname: string; }) {
-    return User.create(data);
+    return UserModel.create(data);
 }
 
-export default { findUser, createUser, countUsers, User };
+export { findUser, createUser, countUsers, UserModel };

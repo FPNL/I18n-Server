@@ -1,59 +1,61 @@
-import Validator = require('express-validator');
-import Bcrypt = require('bcrypt');
-
-import e from '../../../package/e';
-import util from '../util';
-import model from '../model';
-import config from '../../../config';
+// Package
+import Validator from 'express-validator';
+import Bcrypt from 'bcrypt';
+// Module
+import { HttpStatus } from '../../../package/httpStatus';
+import * as util from '../util';
+import * as userModel from '../model/user';
+import * as config from '../../../config';
+// Typing
 import { ModelDeclare } from '../model/model';
 
 async function checkUserExist(data) {
-    const { result } = await util.getDataFromModel(model.User.countUsers, data);
+    const { result } = await util.getDataFromModel(userModel.countUsers, data);
     console.log("checkUserExist", result);
     return result;
 }
 
 async function createUserData(data) {
-    const { result } = await util.getDataFromModel(model.User.createUser, data);
+    const { result } = await util.getDataFromModel(userModel.createUser, data);
     return !!result;
 }
 
-async function fetchUserData(data: { account: string; }): Promise<[boolean, ModelDeclare.User|number]> {
+async function fetchUserData(data: { account: string; }): Promise<[boolean, ModelDeclare.User | number]> {
     const isError = true;
     try {
-        const result = await model.User.findUser(data);
+        const result = await userModel.findUser(data);
         if (result) {
             const userData = <ModelDeclare.User>result.toJSON();
             return [!isError, userData];
         }
-        return [isError, e.HttpStatus.ERROR_NOT_EXIST_USER];
+        return [isError, HttpStatus.ERROR_NOT_EXIST_USER];
     } catch (error) {
-        return [isError, e.HttpStatus.INTERNAL_SERVER_ERROR];
+        return [isError, HttpStatus.INTERNAL_SERVER_ERROR];
     }
 
 }
 
-function hashPassword(reqBodyData: {password: string} ): [boolean, number] {
+function hashPassword(reqBodyData: { password: string; }): [boolean, number] {
     const saltRounds = Number(config.BCRYPT_SALT_ROUNDS) || 10;
     try {
         const hash = Bcrypt.hashSync(reqBodyData.password, saltRounds);
         reqBodyData.password = hash;
-        return [false, e.HttpStatus.OK];
+        return [false, HttpStatus.OK];
     } catch (error) {
-        return [true, e.HttpStatus.INTERNAL_SERVER_ERROR];
+        return [true, HttpStatus.INTERNAL_SERVER_ERROR];
     }
 }
 
 function compareHashPassword(reqBodyData: { password: string; }, passwordFromDB: string): [boolean, number] {
     try {
         const isCorrect = Bcrypt.compareSync(reqBodyData.password, passwordFromDB);
-        return [!isCorrect, e.HttpStatus.ERROR_PASSWORD]
+        return [!isCorrect, HttpStatus.ERROR_PASSWORD];
     } catch (error) {
-        return [true, e.HttpStatus.INTERNAL_SERVER_ERROR];
+        return [true, HttpStatus.INTERNAL_SERVER_ERROR];
     }
 }
 
-async function loginValidation(req): Promise<[boolean, number]>  {
+async function loginValidation(req): Promise<[boolean, number]> {
     await accountValidation(req);
     await passwordValidation(req);
 
@@ -72,17 +74,17 @@ async function registerValidation(req): Promise<[boolean, number]> {
 
 function accountValidation(req) {
     const accountCheck = Validator.check('account').isEmail();
-    return accountCheck( req, null, () => {});
+    return accountCheck(req, null, () => { });
 }
 
 function passwordValidation(req) {
-    const passwordCheck = Validator.check('password').isLength({min: 0, max: 100}).isAlphanumeric();
-    return passwordCheck( req, null, () => {});
+    const passwordCheck = Validator.check('password').isLength({ min: 0, max: 100 }).isAlphanumeric();
+    return passwordCheck(req, null, () => { });
 }
 
 function nicknameValidation(req) {
-    const nicknameCheck = Validator.check('nickname').isLength({min: 0, max: 50}).isAlpha();
-    return nicknameCheck(req, null, () => {})
+    const nicknameCheck = Validator.check('nickname').isLength({ min: 0, max: 50 }).isAlpha();
+    return nicknameCheck(req, null, () => { });
 }
 
 function validationErrorResponse(err: boolean, result: string): [boolean, number] {
@@ -90,24 +92,24 @@ function validationErrorResponse(err: boolean, result: string): [boolean, number
         let errorCode: number;
         switch (result) {
             case 'account':
-                errorCode = e.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE
+                errorCode = HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
                 break;
             case 'password':
-                errorCode = e.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
+                errorCode = HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
                 break;
             case 'nickname':
-                errorCode = e.HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE
+                errorCode = HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
                 break;
             default:
                 errorCode = 500;
                 break;
         }
-        return [err, errorCode]
+        return [err, errorCode];
     }
-    return [false, e.HttpStatus.OK];
+    return [false, HttpStatus.OK];
 }
 
-export default {
+export {
     checkUserExist,
     createUserData,
     fetchUserData,
@@ -115,4 +117,4 @@ export default {
     registerValidation,
     hashPassword,
     compareHashPassword
-}
+};

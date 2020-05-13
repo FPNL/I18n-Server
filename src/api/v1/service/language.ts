@@ -1,35 +1,44 @@
-import Validator = require('express-validator');
-import Express = require('express');
-
-import model from'../model';
-import util from '../util';
-import e from '../../../package/e';
+// Package
+import Validator from 'express-validator';
+import Express from 'express';
+// Module
+import * as langModel from '../model/language';
+import * as util from '../util';
+import { HttpStatus } from '../../../package/httpStatus';
+// Typing
 import { ServiceDeclare } from './service';
-import { ModelDeclare } from '../model/model';
 
-async function setLangListIntoRedis(reqBodyData: { lang: string;}): Promise<boolean> {
-    const result = await model.Lang.r_setLangSet(reqBodyData.lang)
+async function setNativeLangIntoRedis(reqBodyData: { lang: string; }) {
+    return await langModel.r_setNativeLang(reqBodyData.lang);
+}
+
+async function getNativeLangFromRedis() {
+    return await langModel.r_getNativeLang();
+}
+
+async function setLangListIntoRedis(reqBodyData: { lang: string; }): Promise<boolean> {
+    const result = await langModel.r_setLangSet(reqBodyData.lang);
     return result;
 }
 
 async function getLangListFromRedis(): Promise<Array<string>> {
-    const result = await model.Lang.r_getLangSet();
+    const result = await langModel.r_getLangSet();
     return result;
 }
 
 async function removeLangListFromRedis(reqBodyData: { lang: string; }) {
-    const result = await model.Lang.r_removeLangSet(reqBodyData.lang);
+    const result = await langModel.r_removeLangSet(reqBodyData.lang);
     return result;
 }
 
-async function getLangList(reqBodyData?: any): Promise<Array<string>|undefined> {
-    const result = await model.Lang.readLanguageList();
+async function getLangList(reqBodyData?: any): Promise<Array<string> | undefined> {
+    const result = await langModel.readLanguageList();
     return result?.langs;
 }
 
 async function getLimitWordsData(reqParam: { limit?: string; page?: string; }): Promise<Array<ServiceDeclare.wordFormat>> {
     const params = { limit: parseInt(reqParam.limit ?? '50'), skip: parseInt(reqParam.page ?? '0') };
-    return await model.Lang.readWordsData(null, params);
+    return await langModel.readWordsData(null, params);
 }
 
 
@@ -38,19 +47,23 @@ async function checkLangColumnValidation(req: Express.Request): Promise<[boolean
     await langColumnCheck(req, null, () => { });
     const [err, result] = await util.validationErrorHandler(req);
     if (err) {
-        return [err, e.HttpStatus.ERROR_LANG_COLUMN_FORMAT];
+        return [err, HttpStatus.ERROR_LANG_COLUMN_FORMAT];
     }
-    return [err, e.HttpStatus.OK];
+    return [err, HttpStatus.OK];
 }
 
-async function checkLangHasExist(reqBodyData: { lang: string }): Promise<boolean|undefined> {
-    const result = await model.Lang.readLanguageList();
-    const ifLangHasExisted = result?.langs.some(value => value === reqBodyData.lang);
+async function checkLangHasExist(reqBodyData: { lang: string; }, langList?: (string[] | undefined)): Promise<boolean | undefined> {
+    if (!langList) {
+        const dbData = await langModel.readLanguageList();
+        langList = dbData?.langs;
+    }
+
+    const ifLangHasExisted = langList?.some(value => value === reqBodyData.lang);
     return ifLangHasExisted;
 }
 
 async function addOneLangToDB(reqBodyData: { lang: string; }) {
-    return await model.Lang.updateLanguageByPushing(reqBodyData);
+    return await langModel.updateLanguageByPushing(reqBodyData);
 }
 
 async function checkNameValidation(req: Express.Request): Promise<[boolean, number]> {
@@ -58,13 +71,13 @@ async function checkNameValidation(req: Express.Request): Promise<[boolean, numb
     await namesCheck(req, null, () => { });
     const [err, result] = await util.validationErrorHandler(req);
     if (err) {
-        return [err, e.HttpStatus.ERROR_NAME_FORMAT];
+        return [err, HttpStatus.ERROR_NAME_FORMAT];
     }
-    return [err, e.HttpStatus.OK];
+    return [err, HttpStatus.OK];
 }
 
 async function checkWordsValidation(req: Express.Request): Promise<[boolean, number]> {
-    let errorCode = e.HttpStatus.OK;
+    let errorCode = HttpStatus.OK;
 
     const dataCheck = Validator.body('data').isArray({ min: 1 });
     const namesCheck = Validator.body('data.*.name').isAlphanumeric();
@@ -76,7 +89,7 @@ async function checkWordsValidation(req: Express.Request): Promise<[boolean, num
                 }
             }
         } else {
-            errorCode = e.HttpStatus.ERROR_DATA_FORMAT;
+            errorCode = HttpStatus.ERROR_DATA_FORMAT;
         }
         return true;
     });
@@ -89,15 +102,15 @@ async function checkWordsValidation(req: Express.Request): Promise<[boolean, num
     const [err, result] = await util.validationErrorHandler(req);
     if (err) {
         if (result.includes('.name')) {
-            errorCode = e.HttpStatus.ERROR_NAME_FORMAT;
+            errorCode = HttpStatus.ERROR_NAME_FORMAT;
         } else if (result.includes('.content')) {
-            errorCode = e.HttpStatus.ERROR_CONTENT_FORMAT;
+            errorCode = HttpStatus.ERROR_CONTENT_FORMAT;
         } else if (result === 'data') {
-            errorCode = e.HttpStatus.ERROR_DATA_FORMAT;
+            errorCode = HttpStatus.ERROR_DATA_FORMAT;
         }
         return [err, errorCode];
     }
-    return [false, errorCode]
+    return [false, errorCode];
 }
 /**
  * 時間複雜度 O(n*m)
@@ -105,11 +118,11 @@ async function checkWordsValidation(req: Express.Request): Promise<[boolean, num
  * m = langs.length;
  */
 async function checkWordsDataMatchLangs(reqBodyData: ServiceDeclare.wordsFormat): Promise<[boolean, any]> {
-    const result = await model.Lang.readLanguageList();
+    const result = await langModel.readLanguageList();
 
     if (result && result.langs) {
         const { langs } = result;
-        let notMatchedData: string|undefined = "";
+        let notMatchedData: string | undefined = "";
         const everyDataMatched = reqBodyData.data.every(eachData => {
             if (!eachData.hasOwnProperty("content") || !eachData.content) {
                 eachData.content = {};
@@ -131,23 +144,23 @@ async function checkWordsDataMatchLangs(reqBodyData: ServiceDeclare.wordsFormat)
 
 function checkRepeatInsideReqBodyData(reqBodyData: ServiceDeclare.wordsFormat): [boolean, Array<string>] {
     const namesArr = reqBodyData.data.map(value => value.name);
-    const findDuplicates = (arr: string[]) => arr.filter((item, index) => arr.indexOf(item) !== index)
+    const findDuplicates = (arr: string[]) => arr.filter((item, index) => arr.indexOf(item) !== index);
     const repeatNamesArr = [...new Set(findDuplicates(namesArr))];
     return [repeatNamesArr.length > 0, repeatNamesArr];
 }
 
 async function checkWordsExistInDB(reqBodyData: ServiceDeclare.wordsFormat): Promise<[boolean, Array<string>]> {
     const namesArr = reqBodyData.data.map(value => value.name);
-    const result = await model.Lang.readWordsInName(namesArr);
+    const result = await langModel.readWordsInName(namesArr);
     const repeatNamesArr = result.map(v => v.name);
     return [result.length > 0, repeatNamesArr];
 }
 
-async function checkWordsNotExistInDB(reqBodyData: (ServiceDeclare.wordsFormat | { data: Array<string> })): Promise<[boolean, Array<string>]> {
+async function checkWordsNotExistInDB(reqBodyData: (ServiceDeclare.wordsFormat | { data: Array<string>; })): Promise<[boolean, Array<string>]> {
     // @ts-ignore
     const namesArr = reqBodyData.data.map(value => value.name ?? value);
 
-    const result = await model.Lang.readWordsInName(namesArr);
+    const result = await langModel.readWordsInName(namesArr);
     console.log(123, result);
     const repeatNamesArr = result.map(v => v.name);
     const wordNotInDB = namesArr.filter(v => !repeatNamesArr.includes(v));
@@ -169,7 +182,7 @@ async function removeRepeatWordsFromReqBodyData(reqBodyData: ServiceDeclare.word
 async function insertWordsIntoDB(reqBodyData: ServiceDeclare.wordsFormat): Promise<boolean> {
     const { data } = reqBodyData;
     try {
-        await model.Lang.insertWords(data);
+        await langModel.insertWords(data);
         return false;
     } catch (error) {
         return true;
@@ -179,7 +192,7 @@ async function insertWordsIntoDB(reqBodyData: ServiceDeclare.wordsFormat): Promi
 async function updateWordsIntoDB(reqBodyData: ServiceDeclare.wordsFormat): Promise<boolean> {
     const { data } = reqBodyData;
     try {
-        await model.Lang.updateWords(data);
+        await langModel.updateWords(data);
         return false;
     } catch (error) {
         return true;
@@ -187,10 +200,10 @@ async function updateWordsIntoDB(reqBodyData: ServiceDeclare.wordsFormat): Promi
 }
 
 // 返回錯誤 採 go 概念
-async function deleteWordsFromDB(reqBodyData: {data: Array<string>}): Promise<boolean> {
+async function deleteWordsFromDB(reqBodyData: { data: Array<string>; }): Promise<boolean> {
     const { data } = reqBodyData;
     try {
-        const { deletedCount } = await model.Lang.deleteWords(data);
+        const { deletedCount } = await langModel.deleteWords(data);
         return !(deletedCount === data.length);
     } catch (error) {
         return false;
@@ -201,27 +214,27 @@ async function deleteWordsFromDB(reqBodyData: {data: Array<string>}): Promise<bo
 async function deleteLangFromDB(reqBodyData: { lang: string; }): Promise<boolean> {
     const { lang } = reqBodyData;
     try {
-        await model.Lang.deleteLang(lang);
+        await langModel.deleteLang(lang);
         return false;
     } catch (error) {
         return true;
     }
 }
 
-async function checkKeyExist(keyName: string): Promise<boolean> {
-    return await model.Lang.r_getKeyExist(keyName);
+async function checkKeyExistFromRedis(keyName: string): Promise<boolean> {
+    return await langModel.r_getKeyExist(keyName);
 }
 
-async function getNativeLanguage(): Promise<string | undefined>  {
-    const result = await model.Lang.readNativeLang();
+async function getNativeLanguage(): Promise<string | undefined> {
+    const result = await langModel.readNativeLang();
     return result?.nativeLang;
 }
 
 async function updateNativeLang(reqBodyData: { lang: string; }) {
-    return await model.Lang.updateNativeLang(reqBodyData.lang);
+    return await langModel.updateNativeLang(reqBodyData.lang);
 }
 
-export default {
+export {
     getLangList,
     getLimitWordsData,
     checkLangColumnValidation,
@@ -241,7 +254,9 @@ export default {
     setLangListIntoRedis,
     getLangListFromRedis,
     removeLangListFromRedis,
-    checkKeyExist,
+    setNativeLangIntoRedis,
+    checkKeyExistFromRedis,
+    getNativeLangFromRedis,
     getNativeLanguage,
     updateNativeLang,
 };
