@@ -6,8 +6,18 @@ import { routerResponseFormatter } from '../util';
 import { HttpStatus } from '../../../package/httpStatus';
 
 const router = Express.Router();
-
-router.get('/list', async (req, res, next): Promise<void> => {
+export const langPath = {
+    LangList: '/list',
+    WordsContent: '/content',
+    LangAdd: '/addLanguage',
+    WordsAdd: '/addWords',
+    WordsAlter: '/alterWords',
+    LangDelete: '/deleteLanguage',
+    WordsDelete: '/deleteWords',
+    NativeLangGet: '/nativeLang',
+    NativeLangUpdate: '/alterNativeLang'
+};
+router.get(langPath.LangList, async (req, res, next): Promise<void> => {
     let responseData = await langController.r_getLangListHandler();
     if (responseData.status === HttpStatus.WARNING_NOT_EXIST_KEY) {
         responseData = await langController.getLanguageListHandler();
@@ -15,7 +25,7 @@ router.get('/list', async (req, res, next): Promise<void> => {
     routerResponseFormatter(res, responseData);
 });
 
-router.get('/content', async (req, res, next): Promise<void> => {
+router.get(langPath.WordsContent, async (req, res, next): Promise<void> => {
     const responseData = await langController.getWordsContentHandler(req);
     routerResponseFormatter(res, responseData);
 }, (req, res): void => {
@@ -23,13 +33,13 @@ router.get('/content', async (req, res, next): Promise<void> => {
     // const RedisStore();
 });
 
-router.post('/addLanguage', async (req, res, next): Promise<void> => {
+router.post(langPath.LangAdd, async (req, res, next): Promise<void> => {
     const responseData = await langController.addLanguageHandler(req);
     routerResponseFormatter(res, responseData);
 });
 
 // 目前後端先以創建多組詞語為主，但前端使用上先以 創建單一為原則。
-router.post('/addWords', async (req, res, next): Promise<void> => {
+router.post(langPath.WordsAdd, async (req, res, next): Promise<void> => {
     const responseData = await langController.addWordsHandler(req);
     routerResponseFormatter(res, responseData);
 }, (req, res): void => {
@@ -37,17 +47,17 @@ router.post('/addWords', async (req, res, next): Promise<void> => {
     // const RedisStore();
 });
 
-router.put('/alterWords', async (req, res, next): Promise<void> => {
+router.put(langPath.WordsAlter, async (req, res, next): Promise<void> => {
     const responseData = await langController.alterWordsHandler(req);
     routerResponseFormatter(res, responseData);
 });
 
-router.delete('/deleteLanguage', async (req, res, next): Promise<void> => {
+router.delete(langPath.LangDelete, async (req, res, next): Promise<void> => {
     const responseData = await langController.deleteLangHandler(req);
     routerResponseFormatter(res, responseData);
 });
 
-router.delete('/deleteWords', async (req, res, next): Promise<void> => {
+router.delete(langPath.WordsDelete, async (req, res, next): Promise<void> => {
     const responseData = await langController.deleteWordsHandler(req);
     routerResponseFormatter(res, responseData);
 }, (req, res): void => {
@@ -55,7 +65,7 @@ router.delete('/deleteWords', async (req, res, next): Promise<void> => {
     // const RedisDelete();
 });
 
-router.get('/nativeLang', async (req, res, next) => {
+router.get(langPath.NativeLangGet, async (req, res, next) => {
     let responseData = await langController.r_getNativeLangHandler();
     if (responseData.status === HttpStatus.WARNING_NOT_EXIST_KEY) {
         responseData = await langController.getNativeLanguage();
@@ -63,7 +73,7 @@ router.get('/nativeLang', async (req, res, next) => {
     routerResponseFormatter(res, responseData);
 });
 
-router.put('/nativeLang', async (req, res, next) => {
+router.put(langPath.NativeLangUpdate, async (req, res, next) => {
     const responseData = await langController.updateNativeLang(req);
     routerResponseFormatter(res, responseData);
 });

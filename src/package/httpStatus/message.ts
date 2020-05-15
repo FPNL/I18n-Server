@@ -1,10 +1,11 @@
-import code from'./code';
+import code from './code';
 
 export default new Map([
     [code.OK, '成功'],
     [code.NO_DATA, '沒有資料'],
     [code.INVALID_PARAMS, '參數錯誤'],
-    [code.UNAUTHORIZED, '未通過認證'],
+    [code.UNAUTHORIZED, '未通過認證，請先登入'],
+    [code.FORBIDDEN, '你登入了，但不夠格使用'],
     [code.INTERNAL_SERVER_ERROR, '伺服器錯誤'],
 
     [code.ERROR_NOT_EXIST_USER, '使用者不存在'],

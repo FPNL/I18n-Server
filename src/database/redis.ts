@@ -1,4 +1,4 @@
-import Redis from 'redis';
+import * as Redis from 'redis';
 
 import * as config from '../config';
 import { promisify } from 'util';
@@ -7,7 +7,9 @@ function r_connect() {
   // this creates a new client
   const redis = Redis.createClient(
     Number(config.REDIS_PORT),
-    config.REDIS_HOST
+    config.REDIS_HOST, {
+    db: Number(config.REDIS_DB)
+  }
   );
   return redis;
 }

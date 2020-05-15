@@ -23,6 +23,7 @@ class UserModel extends Sequelize.Model {
     public readonly account!: string;
     public password!: string;
     public nickname!: string;
+    public character!: string;
     public readonly timeCreate!: Date;
     public readonly timeUpdate!: Date;
     // public customMethod() {
@@ -45,6 +46,11 @@ UserModel.init({
     nickname: {
         type: Sequelize.STRING,
         allowNull: false
+    },
+    character: {
+        type: Sequelize.ENUM('admin', 'manager', 'adviser'),
+        defaultValue: 'adviser',
+        allowNull: true,
     },
     timeCreate: {
         type: Sequelize.DATE,

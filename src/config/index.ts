@@ -3,7 +3,12 @@ import Path from 'path';
 
 import { ConfigDeclare } from './config';
 
-Dotenv.config({ path: Path.join('.env') });
+let file = '.env';
+if (process.env.NODE_ENV === 'test') {
+  file = '.env.test';
+}
+
+Dotenv.config({ path: Path.join(file) });
 
 export const {
   HOST,
@@ -15,6 +20,7 @@ export const {
   MONGO_DB_DATABASE,
   REDIS_PORT,
   REDIS_HOST,
+  REDIS_DB,
   SESSION_SECRET,
   SESSION_MAX_AGE,
   SESSION_RESAVE,

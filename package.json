@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon",
-    "test": "mocha",
-    "test2": "jest --detectOpenHandles"
+    "test": "jest --detectOpenHandles --watch"
   },
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -22,7 +21,6 @@
     "@types/passport": "^1.0.3",
     "@types/passport-local": "^1.0.33",
     "@types/sinon": "^9.0.0",
-    "@types/validator": "^13.0.0",
     "bcrypt": "^4.0.1",
     "connect-mongo": "^3.2.0",
     "cookie-parser": "~1.4.4",
@@ -50,14 +48,11 @@
   },
   "devDependencies": {
     "@babel/core": "^7.9.6",
+    "@babel/plugin-transform-typescript": "^7.9.6",
     "@babel/preset-env": "^7.9.6",
     "@babel/preset-typescript": "^7.9.0",
     "babel-jest": "^26.0.1",
-    "chai": "^4.2.0",
     "jest": "^26.0.1",
-    "mocha": "^7.1.2",
-    "sinon": "^9.0.2",
-    "ts-jest": "^25.5.1",
     "ts-node": "^8.8.2"
   }
 }

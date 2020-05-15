@@ -6,9 +6,16 @@ import { routerResponseFormatter } from '../util';
 
 const router = Express.Router();
 
-router.post('/login',
+export const userPath = {
+  Login: '/login',
+  Register: '/register'
+};
+
+router.post(userPath.Login,
   userController.customPassportAuth,
   async (req, res, next) => {
+    // console.log(233, req.baseUrl, req.originalUrl, req.route, req.url);
+
     // req.responseData 是 controller 賦予的
     const { responseData } = req;
     if (!responseData) {
@@ -18,7 +25,7 @@ router.post('/login',
   }
 );
 
-router.post('/register', async (req, res, next) => {
+router.post(userPath.Register, async (req, res, next) => {
   const responseData = await userController.registerHandler(req);
   routerResponseFormatter(res, responseData);
 });

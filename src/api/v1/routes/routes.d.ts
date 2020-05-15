@@ -1,4 +1,3 @@
 export namespace Routes {
-  export type routerFn = Promise<void>
-
+  export type routerFn = Promise<void>;
 }

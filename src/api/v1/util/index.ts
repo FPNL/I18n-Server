@@ -1,5 +1,5 @@
 // Package
-import Validator from 'express-validator';
+import * as Validator from 'express-validator';
 import Express from 'express';
 // Module
 import { HttpStatus, HttpStatusMessage } from '../../../package/httpStatus';

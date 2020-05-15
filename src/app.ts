@@ -8,14 +8,13 @@ import Logger from 'morgan';
 import Path from 'path';
 import Mongoose from 'mongoose';
 import Fs from 'fs';
-// import Rfs from 'rotating-file-stream';
-const Rfs = require('rotating-file-stream');
-import Passport from 'passport';
+import * as Rfs from 'rotating-file-stream';
+// import Passport from 'passport';
 
 // 模組
 import * as config from './config';
 import apiRouter_v1 from './api/v1';
-// import authGuard from './package/passport';
+import Passport from './package/passport';
 
 // 型別
 import globalTypings from './global';

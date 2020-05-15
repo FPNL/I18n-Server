@@ -1,6 +1,6 @@
 // Package
-import Validator from 'express-validator';
-import Bcrypt from 'bcrypt';
+import * as Validator from 'express-validator';
+import * as Bcrypt from 'bcrypt';
 // Module
 import { HttpStatus } from '../../../package/httpStatus';
 import * as util from '../util';
