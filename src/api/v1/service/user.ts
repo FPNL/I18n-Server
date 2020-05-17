@@ -10,13 +10,12 @@ import * as config from '../../../config';
 import { ModelDeclare } from '../model/model';
 
 async function checkUserExist(data) {
-    const { result } = await util.getDataFromModel(userModel.countUsers, data);
-    console.log("checkUserExist", result);
+    const result = await userModel.countUsers(data);
     return result;
 }
 
 async function createUserData(data) {
-    const { result } = await util.getDataFromModel(userModel.createUser, data);
+    const result = await userModel.createUser(data);
     return !!result;
 }
 

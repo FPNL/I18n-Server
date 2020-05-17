@@ -1,0 +1,9 @@
+{
+  "bail": 1,
+  "coverageDirectory": "coverage",
+  "coverageReporters": ["json"],
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "testEnvironment": "node",
+  "testMatch": ["**/test/?(*.)+(spec|test).[tj]s?(x)"],
+  "watchman": true
+}

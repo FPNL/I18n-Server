@@ -19,26 +19,6 @@ function routerResponseFormatter(res: Express.Response, responseData: Controller
 
 }
 
-
-async function getDataFromModel(modelFn: Function, data: any): Promise<{ result: Promise<Function>; }> {
-    try {
-        const result = await modelFn(data);
-        return { result };
-    } catch (e) {
-        console.error(" ＝＝＝ getDataFromModel 錯誤 ＝＝＝");
-        let status = HttpStatus.INTERNAL_SERVER_ERROR;
-
-        if (e.name === 'SequelizeValidationError') {
-            // TODO 低 紀錄錯誤
-        } else if (e.name === 'SequelizeUniqueConstraintError') {
-            // TODO 低 紀錄錯誤
-        }
-        // TODO 低 紀錄錯誤
-
-        throw status;
-    }
-}
-
 async function validationErrorHandler(req: Express.Request): Promise<[boolean, string]> {
     const errors = await Validator.validationResult(req);
     let result = '';
@@ -50,4 +30,4 @@ async function validationErrorHandler(req: Express.Request): Promise<[boolean, s
     return [isError, result];
 }
 
-export { routerResponseFormatter, getDataFromModel, validationErrorHandler };
+export { routerResponseFormatter, validationErrorHandler };
