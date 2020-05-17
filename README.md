@@ -1,11 +1,20 @@
 <!--
+    1.  logger
+    2.  login session, authentication
+    3.  session in DB
+    4.  custom HttpCode
+    5.  限制 IP
+    6.  redis, nosql, sql,
+    7.  authorization
+    8.  MVC pattern - service
+    9.  docker
+    10. part of BDD
+
     TODO
-    3. 權限 使用 TDD or BDD 方式 轉移授權
-    4. 建言 api
-    5. ts 編譯問題
-    6. CI/CD
-    7. WebSocket
-    8. 限制 IP
+    2. 建言 api
+    3. ts 編譯問題
+    4. CI/CD
+    5. WebSocket
 -->
 
 ### 引用規則
