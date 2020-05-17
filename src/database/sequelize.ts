@@ -8,7 +8,8 @@ function s_connect() {
         dialect: config.DATABASE_TYPE,
         // The `timestamps` field specify whether or not the `createdAt` and `updatedAt` fields will be created.
         // This was true by default, but now is false by default
-        define: { timestamps: false }
+        define: { timestamps: false },
+        logging: config.SEQUELIZE_LOGGING === 'false' ? false : console.log,
     });
 }
 

@@ -1,14 +1,13 @@
 // Package
 import Express from 'express';
 // Module
-import { isAuthByPassport } from './middleware/auth';
+import { isAuthByPassport, isAuthorization } from './middleware/auth';
 import userRouter from './routes/user';
-
 import langRouter from './routes/language';
 
 const subApp_v1 = Express();
 
-subApp_v1.use('/user', userRouter);
-subApp_v1.use('/language', isAuthByPassport, langRouter);
+subApp_v1.use('/user', isAuthorization, userRouter);
+subApp_v1.use('/language', isAuthorization, isAuthByPassport, langRouter);
 
 export default subApp_v1;

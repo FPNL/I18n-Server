@@ -1,10 +1,11 @@
 <!--
     TODO
-    3. 權限 使用 TDD or BDD 方式
-    4. ts 編譯問題
-    5. CI/CD
-    6. WebSocket
-    7. 限制 IP
+    3. 權限 使用 TDD or BDD 方式 轉移授權
+    4. 建言 api
+    5. ts 編譯問題
+    6. CI/CD
+    7. WebSocket
+    8. 限制 IP
 -->
 
 ### 引用規則
