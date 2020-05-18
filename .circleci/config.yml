@@ -1,0 +1,35 @@
+version: 2.1
+orbs:
+  gcp-cli: circleci/gcp-cli@1.8.4
+  # node: circleci/node@2.1.1
+
+jobs:
+  deploy-on-gcp:
+    executor: gcp-cli/google
+    steps:
+      - checkout
+      - gcp-cli/initialize
+      - gcp-cli/install
+      - run: cat app.yaml
+      - run: gcloud app deploy
+  # node-install-and-build:
+#     executor:
+#       name: node/default
+#       tag: "lts"
+#     steps:
+#       - checkout
+#       - node/install:
+#           install-yarn: true
+#           node-version: lts
+#       - node/install-packages:
+#           pkg-manager: yarn
+#           cache-key: yarn.lock
+#       - run: node --version
+#       - run: yarn build
+workflows:
+  deploy-gcp-app-engine:
+    jobs:
+      - deploy-on-gcp
+      # - node-install-and-build
+      # - gcp-cli/install_and_initialize_cli:
+      #     executor: gcp-cli/google

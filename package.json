@@ -3,9 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon",
-    "build": "tsc --project tsconfig.json ",
-    "test": "jest --detectOpenHandles --watch"
+    "start": "node ./build/app.js",
+    "gcp-build": "tsc -p .",
+
+    "start:dev": "nodemon",
+    "test": "jest --detectOpenHandles"
   },
   "dependencies": {
     "bcrypt": "^4.0.1",
