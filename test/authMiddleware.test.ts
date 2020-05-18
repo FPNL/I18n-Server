@@ -1,11 +1,13 @@
-import { isAuthorization } from '../auth';
-import { UserModel, createUser, findUser } from '../../model/user';
-import { HttpStatus } from '../../../../package/httpStatus';
+import { isAuthorization } from '../src/api/v1/middleware/auth';
+import { UserModel, createUser, findUser } from '../src/api/v1/model/user';
+import { HttpStatus } from '../src/package/httpStatus';
 
 
 // routerResponseFormatter is a mock function
-jest.mock('../../util'); // this happens automatically with automocking
-const { routerResponseFormatter } = require('../../util');
+jest.mock('../src/api/v1/util'); // this happens automatically with automocking
+// const { routerResponseFormatter } = require('../src/api/v1/util');
+import { routerResponseFormatter } from '../src/api/v1/util';
+
 /*
 目的：權限
 想法:
@@ -122,7 +124,6 @@ describe('使用者的身份被不允許1', function () {
 
   it('他被查驗禁止進入', () => {
     let res: any;
-
     routerResponseFormatter.mockImplementation((_res, data) => {
       expect(data).toHaveProperty('status', HttpStatus.UNAUTHORIZED);
     });
