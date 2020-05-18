@@ -5,7 +5,7 @@ import Path from 'path';
 const accessLogStream = Rfs.createStream(
   'access.log',
   {
-    path: Path.join(__dirname, '../../log'),
+    path: Path.join('/tmp'),
     interval: '1d'
   }
 );
