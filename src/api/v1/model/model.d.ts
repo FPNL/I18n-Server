@@ -12,6 +12,16 @@ export namespace ModelDeclare {
     content: ServiceDeclare.wordContent;
     // name: string;
   }
+  export interface UserModel extends Mongoose.Document {
+    id: string;
+    account: string;
+    password: string;
+    character: string;
+    owner: boolean;
+    nickname: string;
+    timeCreate: Date;
+    timeUpdate: Date;
+  }
   export interface User {
     id: string;
     account: string;

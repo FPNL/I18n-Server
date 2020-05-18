@@ -19,12 +19,12 @@ async function createUserData(data) {
     return !!result;
 }
 
-async function fetchUserData(data: { account: string; }): Promise<[boolean, ModelDeclare.User | number]> {
+async function fetchUserData(data: { account: string; }): Promise<[boolean, ModelDeclare.UserModel | number]> {
     const isError = true;
     try {
         const result = await userModel.findUser(data);
         if (result) {
-            const userData = <ModelDeclare.User>result.toJSON();
+            const userData = result;
             return [!isError, userData];
         }
         return [isError, HttpStatus.ERROR_NOT_EXIST_USER];

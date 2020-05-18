@@ -45,14 +45,14 @@ async function loginHandler(req: Express.Request): Promise<[boolean, { id: strin
         }
 
         // 確認密碼
-        const [hashError, compareResult] = userService.compareHashPassword(reqData, (userOrHttpStatus as ModelDeclare.User).password);
+        const [hashError, compareResult] = userService.compareHashPassword(reqData, (userOrHttpStatus as ModelDeclare.UserModel).password);
         if (hashError) {
             req.responseData = { result: false, status: compareResult };
             return [isError, null];
         }
 
         req.responseData = { result: true, status: HttpStatus.OK };
-        return [!isError, (userOrHttpStatus as ModelDeclare.User)];
+        return [!isError, (userOrHttpStatus as ModelDeclare.UserModel)];
 
         // TODO 低 websocket 連線
         // WebSocket()

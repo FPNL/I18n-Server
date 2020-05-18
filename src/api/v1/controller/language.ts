@@ -23,29 +23,6 @@ async function getLanguageListHandler(): Promise<ControllerDeclare.typicalRespon
     return { status: HttpStatus.NO_DATA, result: false };
 }
 
-async function r_getLangListHandler(): Promise<ControllerDeclare.typicalResponse> {
-    // check has key -> 給資料.
-    // router 有權限檢查的 middleware  -> 給資料.
-    try {
-        const keyName = 'langs';
-        const hasKey = await langService.checkKeyExistFromRedis(keyName);
-        if (!hasKey) {
-            return { status: HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
-        }
-
-        const result = await langService.getLangListFromRedis();
-        if (result.length /*&& await Service.Lang.checkResponseLangColumnFormat(result)*/) {
-            return { status: HttpStatus.OK, result };
-        }
-
-    } catch (error) {
-        console.error("getLanguageListHandler 錯誤", error);
-        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
-    }
-    return { status: HttpStatus.NO_DATA, result: false };
-}
-
-
 async function getWordsContentHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     // router 有權限檢查的 middleware  -> 從資料庫取得資料 -> ?檢查返回的資料格式? -> 給資料
     try {
@@ -85,7 +62,7 @@ async function addLanguageHandler(req: Express.Request): Promise<ControllerDecla
             throw new Error("新增語言至資料庫失敗");
         }
 
-        await langService.setLangListIntoRedis(reqBodyData);
+        // await langService.setLangListIntoRedis(reqBodyData);
 
     } catch (error) {
         console.error("addLanguageHandler 錯誤", error);
@@ -235,7 +212,7 @@ async function deleteLangHandler(req: Express.Request): Promise<ControllerDeclar
             throw HttpStatusMessage.get(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        await langService.removeLangListFromRedis(reqBodyData);
+        // await langService.removeLangListFromRedis(reqBodyData);
 
     } catch (error) {
         console.error("deleteLangHandler 錯誤 : ", error);
@@ -253,7 +230,7 @@ async function getNativeLanguage(): Promise<ControllerDeclare.typicalResponse> {
             return { status: HttpStatus.ERROR_NOT_EXIST_LANGUAGE, result: false };
         }
 
-        await langService.setNativeLangIntoRedis({ lang: currentLang });
+        // await langService.setNativeLangIntoRedis({ lang: currentLang });
 
         return { status: HttpStatus.OK, result: currentLang };
     } catch (error) {
@@ -284,7 +261,7 @@ async function updateNativeLang(req: Express.Request): Promise<ControllerDeclare
 
         await langService.updateNativeLang(reqBodyData);
 
-        await langService.setNativeLangIntoRedis(reqBodyData);
+        // await langService.setNativeLangIntoRedis(reqBodyData);
 
     } catch (error) {
         console.error("updateNativeLang 錯誤 : ", error);
@@ -293,25 +270,43 @@ async function updateNativeLang(req: Express.Request): Promise<ControllerDeclare
     return { status: HttpStatus.OK, result: true };
 }
 
-async function r_getNativeLangHandler() {
-    try {
-        const keyName = 'nativeLang';
-        const hasKey = await langService.checkKeyExistFromRedis(keyName);
-        if (!hasKey) {
-            return { status: HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
-        }
+// async function r_getNativeLangHandler() {
+//     try {
+//         const keyName = 'nativeLang';
+//         const hasKey = await langService.checkKeyExistFromRedis(keyName);
+//         if (!hasKey) {
+//             return { status: HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
+//         }
+//         const result = await langService.getNativeLangFromRedis();
+//         if (result) {
+//             return { status: HttpStatus.OK, result };
+//         }
+//     } catch (error) {
+//         console.error("r_getNativeLangHandler 錯誤", error);
+//         return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+//     }
+//     return { status: HttpStatus.NO_DATA, result: false };
+// }
 
-        const result = await langService.getNativeLangFromRedis();
-        if (result) {
-            return { status: HttpStatus.OK, result };
-        }
-    } catch (error) {
-        console.error("r_getNativeLangHandler 錯誤", error);
-        return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
-    }
-    return { status: HttpStatus.NO_DATA, result: false };
-
-}
+// async function r_getLangListHandler(): Promise<ControllerDeclare.typicalResponse> {
+//     // check has key -> 給資料.
+//     // router 有權限檢查的 middleware  -> 給資料.
+//     try {
+//         const keyName = 'langs';
+//         const hasKey = await langService.checkKeyExistFromRedis(keyName);
+//         if (!hasKey) {
+//             return { status: HttpStatus.WARNING_NOT_EXIST_KEY, result: false };
+//         }
+//         const result = await langService.getLangListFromRedis();
+//         if (result.length /*&& await Service.Lang.checkResponseLangColumnFormat(result)*/) {
+//             return { status: HttpStatus.OK, result };
+//         }
+//     } catch (error) {
+//         console.error("getLanguageListHandler 錯誤", error);
+//         return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
+//     }
+//     return { status: HttpStatus.NO_DATA, result: false };
+// }
 
 export {
     getLanguageListHandler,
@@ -323,6 +318,6 @@ export {
     deleteLangHandler,
     updateNativeLang,
     getNativeLanguage,
-    r_getLangListHandler,
-    r_getNativeLangHandler
+    // r_getLangListHandler,
+    // r_getNativeLangHandler
 };

@@ -6,12 +6,12 @@ import { loginHandler } from '../../api/v1/controller/user';
 
 
 Passport.serializeUser(function (user: any, done) {
-  done(null, user.id);
+  done(null, user._id.toString());
 });
 
 Passport.deserializeUser(async function (id: string, done) {
   try {
-    const user = await UserModel.findByPk(id);
+    const user = await UserModel.findById(id);
     done(null, user);
   } catch (error) {
     done(error, false);

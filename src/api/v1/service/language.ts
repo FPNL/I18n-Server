@@ -8,28 +8,28 @@ import { HttpStatus } from '../../../package/httpStatus';
 // Typing
 import { ServiceDeclare } from './service';
 
-async function setNativeLangIntoRedis(reqBodyData: { lang: string; }) {
-    return await langModel.r_setNativeLang(reqBodyData.lang);
-}
+// async function setNativeLangIntoRedis(reqBodyData: { lang: string; }) {
+//     return await langModel.r_setNativeLang(reqBodyData.lang);
+// }
 
-async function getNativeLangFromRedis() {
-    return await langModel.r_getNativeLang();
-}
+// async function getNativeLangFromRedis() {
+//     return await langModel.r_getNativeLang();
+// }
 
-async function setLangListIntoRedis(reqBodyData: { lang: string; }): Promise<boolean> {
-    const result = await langModel.r_setLangSet(reqBodyData.lang);
-    return result;
-}
+// async function setLangListIntoRedis(reqBodyData: { lang: string; }): Promise<boolean> {
+//     const result = await langModel.r_setLangSet(reqBodyData.lang);
+//     return result;
+// }
 
-async function getLangListFromRedis(): Promise<Array<string>> {
-    const result = await langModel.r_getLangSet();
-    return result;
-}
+// async function getLangListFromRedis(): Promise<Array<string>> {
+//     const result = await langModel.r_getLangSet();
+//     return result;
+// }
 
-async function removeLangListFromRedis(reqBodyData: { lang: string; }) {
-    const result = await langModel.r_removeLangSet(reqBodyData.lang);
-    return result;
-}
+// async function removeLangListFromRedis(reqBodyData: { lang: string; }) {
+//     const result = await langModel.r_removeLangSet(reqBodyData.lang);
+//     return result;
+// }
 
 async function getLangList(reqBodyData?: any): Promise<Array<string> | undefined> {
     const result = await langModel.readLanguageList();
@@ -221,9 +221,9 @@ async function deleteLangFromDB(reqBodyData: { lang: string; }): Promise<boolean
     }
 }
 
-async function checkKeyExistFromRedis(keyName: string): Promise<boolean> {
-    return await langModel.r_getKeyExist(keyName);
-}
+// async function checkKeyExistFromRedis(keyName: string): Promise<boolean> {
+//     return await langModel.r_getKeyExist(keyName);
+// }
 
 async function getNativeLanguage(): Promise<string | undefined> {
     const result = await langModel.readNativeLang();
@@ -251,12 +251,12 @@ export {
     checkNameValidation,
     deleteWordsFromDB,
     deleteLangFromDB,
-    setLangListIntoRedis,
-    getLangListFromRedis,
-    removeLangListFromRedis,
-    setNativeLangIntoRedis,
-    checkKeyExistFromRedis,
-    getNativeLangFromRedis,
+    // setLangListIntoRedis,
+    // getLangListFromRedis,
+    // removeLangListFromRedis,
+    // setNativeLangIntoRedis,
+    // checkKeyExistFromRedis,
+    // getNativeLangFromRedis,
     getNativeLanguage,
     updateNativeLang,
 };

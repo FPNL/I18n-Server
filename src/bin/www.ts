@@ -9,8 +9,8 @@ import http from 'http';
 
 import app from '../app';
 import { m_connectionTest } from '../database/mongoose';
-import { s_connectionTest } from '../database/sequelize';
-import { r_connectionTest } from '../database/redis';
+// import { s_connectionTest } from '../database/sequelize';
+// import { r_connectionTest } from '../database/redis';
 debug('i18n-server:server');
 /**
  * Get port from environment and store in Express.
@@ -29,8 +29,8 @@ var server = http.createServer(app);
  * Listen on provided port, on all network interfaces.
  */
 (async () => {
-  await s_connectionTest();
-  await r_connectionTest();
+  // await s_connectionTest();
+  // await r_connectionTest();
   await m_connectionTest();
   server.listen(port);
   server.on('error', onError);

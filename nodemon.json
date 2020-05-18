@@ -1,5 +1,5 @@
 {
   "ext": "ts, json",
   "ignore": ["src/**/*.spec.ts"],
-  "exec": "ts-node ./src/bin/www.ts"
+  "exec": "ts-node ./src/bin/www.ts "
 }

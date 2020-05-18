@@ -6,6 +6,8 @@ import { ConfigDeclare } from './config';
 let file = '.env';
 if (process.env.NODE_ENV === 'test') {
   file = '.env.test';
+} else if (process.env.NODE_ENV === 'production') {
+  file = '.env.production';
 }
 
 Dotenv.config({ path: Path.join(file) });
@@ -19,6 +21,7 @@ export const {
   SEQUELIZE_LOGGING,
   MONGO_DB_URI,
   MONGO_DB_DATABASE,
+  MONGO_DB_PARAMETER,
   REDIS_PORT,
   REDIS_HOST,
   REDIS_DB,

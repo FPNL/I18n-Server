@@ -6,13 +6,13 @@ import { promisify } from "util";
 
 // 模組
 import { m_connect } from '../../../database/mongoose';
-import { r_connect } from '../../../database/redis';
+// import { r_connect } from '../../../database/redis';
 
 // 型別
 import { ModelDeclare } from './model';
 import { ServiceDeclare } from '../service/service';
 
-const redis = r_connect();
+// const redis = r_connect();
 const mongoose = m_connect();
 const Schema = mongoose.Schema;
 
@@ -112,46 +112,46 @@ function updateNativeLang(data: string) {
     return LangConfigModel.updateOne({}, { nativeLang: data });
 }
 
-function r_setLangSet(data: string[] | string): boolean {
-    const keyName = 'langs';
-    return redis.sadd(keyName, data);
+// function r_setLangSet(data: string[] | string): boolean {
+//     const keyName = 'langs';
+//     return redis.sadd(keyName, data);
 
-}
+// }
 
-function r_getLangSet(): string[] {
-    const keyName = 'langs';
-    const smembersAsync = promisify(redis.smembers).bind(redis);
-    return smembersAsync(keyName);
-}
+// function r_getLangSet(): string[] {
+//     const keyName = 'langs';
+//     const smembersAsync = promisify(redis.smembers).bind(redis);
+//     return smembersAsync(keyName);
+// }
 
-function r_removeLangSet(data: string): string[] {
-    const keyName = 'langs';
-    const sremAsync = promisify(redis.srem).bind(redis);
-    return sremAsync(keyName, data);
-}
+// function r_removeLangSet(data: string): string[] {
+//     const keyName = 'langs';
+//     const sremAsync = promisify(redis.srem).bind(redis);
+//     return sremAsync(keyName, data);
+// }
 
-function r_getKeyExist(data: string): boolean {
-    const keyExistAsync = promisify(redis.exists).bind(redis);
-    return keyExistAsync(data);
-}
+// function r_getKeyExist(data: string): boolean {
+//     const keyExistAsync = promisify(redis.exists).bind(redis);
+//     return keyExistAsync(data);
+// }
 
-function r_setNativeLang(lang: string) {
-    const keyName = "nativeLang";
-    const setAsync = promisify(redis.set).bind(redis);
-    return setAsync(keyName, lang);
-}
+// function r_setNativeLang(lang: string) {
+//     const keyName = "nativeLang";
+//     const setAsync = promisify(redis.set).bind(redis);
+//     return setAsync(keyName, lang);
+// }
 
-function r_getNativeLang() {
-    const keyName = "nativeLang";
-    const getAsync = promisify(redis.get).bind(redis);
-    return getAsync(keyName);
-}
+// function r_getNativeLang() {
+//     const keyName = "nativeLang";
+//     const getAsync = promisify(redis.get).bind(redis);
+//     return getAsync(keyName);
+// }
 
-function r_setWordHash(data: { name: string, content: { [p: string]: string; }; }) {
-    // const name = data.name;
-    // const hsetAsync = promisify(redis.hset).bind(redis);
-    // return hsetAsync(name, data.content);
-}
+// function r_setWordHash(data: { name: string, content: { [p: string]: string; }; }) {
+//     // const name = data.name;
+//     // const hsetAsync = promisify(redis.hset).bind(redis);
+//     // return hsetAsync(name, data.content);
+// }
 
 export {
     initLanguageModel,
@@ -167,10 +167,10 @@ export {
     readNativeLang,
     updateNativeLang,
     // readWordExist,
-    r_setLangSet,
-    r_getLangSet,
-    r_removeLangSet,
-    r_getKeyExist,
-    r_setNativeLang,
-    r_getNativeLang,
+    // r_setLangSet,
+    // r_getLangSet,
+    // r_removeLangSet,
+    // r_getKeyExist,
+    // r_setNativeLang,
+    // r_getNativeLang,
 };

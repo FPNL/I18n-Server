@@ -35,5 +35,5 @@ async function r_connectionTest() {
     return false;
   }
 }
-
+// 沒錢買 線上 redis 改用 mongo
 export { r_connect, r_connectionTest };

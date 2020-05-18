@@ -31,4 +31,5 @@ async function s_connectionTest(): Promise<boolean> {
 //     return sequelize.define;
 // }
 
-export { s_connect, s_connectionTest };
+// 沒錢買 線上 sql 改用 mongo
+// export { s_connect, s_connectionTest };

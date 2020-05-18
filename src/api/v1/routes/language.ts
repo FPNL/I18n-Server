@@ -18,10 +18,10 @@ export const langPath = {
     NativeLangUpdate: '/alterNativeLang'
 };
 router.get(langPath.LangList, async (req, res, next): Promise<void> => {
-    let responseData = await langController.r_getLangListHandler();
-    if (responseData.status === HttpStatus.WARNING_NOT_EXIST_KEY) {
-        responseData = await langController.getLanguageListHandler();
-    }
+    // let responseData = await langController.r_getLangListHandler();
+    // if (responseData.status === HttpStatus.WARNING_NOT_EXIST_KEY) {
+    let responseData = await langController.getLanguageListHandler();
+    // }
     routerResponseFormatter(res, responseData);
 });
 
@@ -66,10 +66,10 @@ router.delete(langPath.WordsDelete, async (req, res, next): Promise<void> => {
 });
 
 router.get(langPath.NativeLangGet, async (req, res, next) => {
-    let responseData = await langController.r_getNativeLangHandler();
-    if (responseData.status === HttpStatus.WARNING_NOT_EXIST_KEY) {
-        responseData = await langController.getNativeLanguage();
-    }
+    // let responseData = await langController.r_getNativeLangHandler();
+    // if (responseData.status === HttpStatus.WARNING_NOT_EXIST_KEY) {
+    let responseData = await langController.getNativeLanguage();
+    // }
     routerResponseFormatter(res, responseData);
 });
 

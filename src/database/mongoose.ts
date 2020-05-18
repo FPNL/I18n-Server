@@ -3,7 +3,7 @@ import Mongoose from 'mongoose';
 import * as config from '../config';
 
 function m_connect() {
-    Mongoose.connect(config.MONGO_DB_URI + config.MONGO_DB_DATABASE,
+    Mongoose.connect(config.MONGO_DB_URI + config.MONGO_DB_DATABASE + config.MONGO_DB_PARAMETER,
         {
             useNewUrlParser: true,
             useUnifiedTopology: true,
@@ -18,7 +18,7 @@ function m_connect() {
 
 async function m_connectionTest() {
     try {
-        console.log('mongoose 測試連線...', config.MONGO_DB_URI + config.MONGO_DB_DATABASE);
+        console.log('mongoose 測試連線...', config.MONGO_DB_URI + config.MONGO_DB_DATABASE + config.MONGO_DB_PARAMETER);
 
         const mongooseClient = await m_connect();
         const db = mongooseClient.connection;

@@ -10,7 +10,7 @@ import helmet from 'helmet';
 import apiRouter_v1 from './api/v1';
 import Passport from './package/passport';
 import { mongoSession } from './package/session';
-import { iPLimit } from './package/ipLimit';
+// import { iPLimit } from './package/ipLimit';
 import { logger } from './package/logger';
 // import * as config from './config';
 // 型別
@@ -21,7 +21,7 @@ const app = Express();
 // view engine setup
 // app.set('views', path.join(__dirname, 'views'));
 // app.set('view engine', 'pug');
-app.use(iPLimit);
+// app.use(iPLimit);
 app.use(logger);
 app.use(mongoSession);
 app.use(helmet());
@@ -50,6 +50,7 @@ app.use(function (err, req, res, next) {
   // res.locals.error = req.app.get('env') === 'development' ? err : {};
   // render the error page
   // res.render('error');
+  console.log(err);
 
   res
     .status(err.status || 500)
