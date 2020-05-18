@@ -1,12 +1,12 @@
 // For a detailed explanation regarding each configuration property, visit:
 // https://jestjs.io/docs/en/configuration.html
 
-{
+module.exports = {
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
   // Stop running tests after `n` failures
-  "bail": 1,
+  bail: 1,
 
   // The directory where Jest should store its cached dependency information
   // cacheDirectory: "/private/var/folders/c2/j2fgd_9d4ylf3rggb_p1171h0000gn/T/jest_dx",
@@ -21,7 +21,7 @@
   // collectCoverageFrom: undefined,
 
   // The directory where Jest should output its coverage files
-  "coverageDirectory": "coverage",
+  coverageDirectory: "coverage",
 
   // An array of regexp pattern strings used to skip coverage collection
   // coveragePathIgnorePatterns: [
@@ -29,7 +29,7 @@
   // ],
 
   // A list of reporter names that Jest uses when writing coverage reports
-  "coverageReporters": [
+  coverageReporters: [
     //   "text",
     //   "lcov",
     //   "clover"
@@ -66,7 +66,7 @@
   // ],
 
   // An array of file extensions your modules use
-  "moduleFileExtensions": [
+  moduleFileExtensions: [
     "js",
     "json",
     //   "jsx",
@@ -129,7 +129,7 @@
   // snapshotSerializers: [],
 
   // The test environment that will be used for testing
-  "testEnvironment": "node",
+  testEnvironment: "node",
 
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
@@ -138,7 +138,7 @@
   // testLocationInResults: false,
 
   // The glob patterns Jest uses to detect test files
-  "testMatch": [
+  testMatch: [
     "**/test/?(*.)+(spec|test).[tj]s?(x)"
   ],
 
@@ -180,5 +180,5 @@
   // watchPathIgnorePatterns: [],
 
   // Whether to use watchman for file crawling
-  "watchman": true
+  watchman: true
 }

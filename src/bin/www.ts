@@ -7,10 +7,10 @@
 import debug from 'debug';
 import http from 'http';
 
-import app from '../src/app';
-import { m_connectionTest } from '../src/database/mongoose';
-import { s_connectionTest } from '../src/database/sequelize';
-import { r_connectionTest } from '../src/database/redis';
+import app from '../app';
+import { m_connectionTest } from '../database/mongoose';
+import { s_connectionTest } from '../database/sequelize';
+import { r_connectionTest } from '../database/redis';
 debug('i18n-server:server');
 /**
  * Get port from environment and store in Express.
