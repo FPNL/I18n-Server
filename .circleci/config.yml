@@ -10,7 +10,11 @@ jobs:
       - checkout
       - gcp-cli/initialize
       - gcp-cli/install
-      - run: cat app.yaml
+      - run: cp .env.example .env.production
+      - run: sed -i 's|DESCRIBE_YOUR_MONGO_DB_URI|'${MONGO_DB_URI}'|' .env.production
+      - run: sed -i 's|DESCRIBE_MONGO_DB_PARAMETER|'${MONGO_DB_PARAMETER}'|' .env.production
+      - run: sed -i 's|DESCRIBE_SESSION_SECRET|'${SESSION_SECRET}'|' .env.production
+      - run: cat .env.production
       - run: gcloud app deploy
   # node-install-and-build:
 #     executor:
