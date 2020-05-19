@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./build/src/app.js",
+    "start": "node ./build/src/bin/www.js",
     "gcp-build": "tsc -p .",
 
     "start:dev": "nodemon",
