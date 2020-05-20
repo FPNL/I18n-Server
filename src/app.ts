@@ -18,9 +18,6 @@ import globalTypings from './global';
 
 const app = Express();
 
-// view engine setup
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'pug');
 // app.use(iPLimit);
 app.use(logger);
 app.use(mongoSession);
@@ -50,14 +47,18 @@ app.use(function (err, req, res, next) {
   // res.locals.error = req.app.get('env') === 'development' ? err : {};
   // render the error page
   // res.render('error');
-  console.log(err);
+  const resJson = process.env.NODE_ENV === 'production'
+    ? {
+      message: err.message,
+    }
+    : {
+      message: err.message,
+      stack: err.stack
+    };
 
   res
     .status(err.status || 500)
-    .json({
-      message: err.message,
-      stack: err.stack
-    });
+    .json(resJson);
 });
 
 export default app;

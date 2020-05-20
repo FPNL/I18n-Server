@@ -1,7 +1,7 @@
 import Passport from 'passport';
 import LocalStrategy from 'passport-local';
 
-import { UserModel } from '../../api/v1/model/user';
+import { UserModel } from '../../api/v1/repository/user';
 import { loginHandler } from '../../api/v1/controller/user';
 
 

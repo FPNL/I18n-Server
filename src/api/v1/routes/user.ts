@@ -12,10 +12,8 @@ export const userPath = {
 };
 
 router.post(userPath.Login,
-  userController.customPassportAuth,
+  userController.customPassportAuthHandler,
   async (req, res, next) => {
-    // console.log(233, req.baseUrl, req.originalUrl, req.route, req.url);
-
     // req.responseData 是 controller 賦予的
     const { responseData } = req;
     if (!responseData) {

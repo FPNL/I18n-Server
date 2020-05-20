@@ -2,7 +2,7 @@
 import * as Validator from 'express-validator';
 import Express from 'express';
 // Module
-import * as langModel from '../model/language';
+import * as langModel from '../repository/language';
 import * as util from '../util';
 import { HttpStatus } from '../../../package/httpStatus';
 // Typing
@@ -130,8 +130,6 @@ async function checkWordsDataMatchLangs(reqBodyData: ServiceDeclare.wordsFormat)
             }
             const reqKeys = Object.keys(eachData.content);
             notMatchedData = reqKeys.find(column => !langs.includes(column));
-            console.log(133, notMatchedData);
-
             return !notMatchedData; // 左側為縮寫，完整句子： if (notMatchedData) { return false; } else { return true; }
         });
 
@@ -155,13 +153,12 @@ async function checkWordsExistInDB(reqBodyData: ServiceDeclare.wordsFormat): Pro
     const repeatNamesArr = result.map(v => v.name);
     return [result.length > 0, repeatNamesArr];
 }
-
+// data 格式有兩種
 async function checkWordsNotExistInDB(reqBodyData: (ServiceDeclare.wordsFormat | { data: Array<string>; })): Promise<[boolean, Array<string>]> {
     // @ts-ignore
     const namesArr = reqBodyData.data.map(value => value.name ?? value);
 
     const result = await langModel.readWordsInName(namesArr);
-    console.log(123, result);
     const repeatNamesArr = result.map(v => v.name);
     const wordNotInDB = namesArr.filter(v => !repeatNamesArr.includes(v));
     return [wordNotInDB.length > 0, wordNotInDB];

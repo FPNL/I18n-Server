@@ -5,9 +5,9 @@ import Passport from 'passport';
 import { HttpStatus } from '../../../package/httpStatus';
 import * as userService from '../service/user';
 // Typing
-import { ModelDeclare } from '../model/model';
+import { ModelDeclare } from '../repository/model';
 
-function customPassportAuth(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
+function customPassportAuthHandler(req: Express.Request, res: Express.Response, next: Express.NextFunction) {
     Passport.authenticate('local', function (_err, user, _info) {
         if (!user) { return next(); }
         req.logIn(user, function (err) {
@@ -96,5 +96,5 @@ async function registerHandler(req) {
 export {
     loginHandler,
     registerHandler,
-    customPassportAuth,
+    customPassportAuthHandler,
 };

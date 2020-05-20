@@ -222,7 +222,7 @@ async function deleteLangHandler(req: Express.Request): Promise<ControllerDeclar
     return { status: HttpStatus.OK, result: true };
 }
 
-async function getNativeLanguage(): Promise<ControllerDeclare.typicalResponse> {
+async function getNativeLanguageHandler(): Promise<ControllerDeclare.typicalResponse> {
     try {
         // 檢查權限 -> 給資料
         const currentLang = await langService.getNativeLanguage();
@@ -234,12 +234,12 @@ async function getNativeLanguage(): Promise<ControllerDeclare.typicalResponse> {
 
         return { status: HttpStatus.OK, result: currentLang };
     } catch (error) {
-        console.error("deleteLangHandler 錯誤 : ", error);
+        console.error("getNativeLanguageHandler 錯誤 : ", error);
         return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
 }
 
-async function updateNativeLang(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
+async function updateNativeLangHandler(req: Express.Request): Promise<ControllerDeclare.typicalResponse> {
     try {
         // value validation -> check if it exist in list -> not same update
         const reqBodyData = <{ lang: string; }>req.body;
@@ -264,7 +264,7 @@ async function updateNativeLang(req: Express.Request): Promise<ControllerDeclare
         // await langService.setNativeLangIntoRedis(reqBodyData);
 
     } catch (error) {
-        console.error("updateNativeLang 錯誤 : ", error);
+        console.error("updateNativeLangHandler 錯誤 : ", error);
         return { status: HttpStatus.INTERNAL_SERVER_ERROR, result: false };
     }
     return { status: HttpStatus.OK, result: true };
@@ -316,8 +316,8 @@ export {
     alterWordsHandler,
     deleteWordsHandler,
     deleteLangHandler,
-    updateNativeLang,
-    getNativeLanguage,
+    updateNativeLangHandler,
+    getNativeLanguageHandler,
     // r_getLangListHandler,
     // r_getNativeLangHandler
 };

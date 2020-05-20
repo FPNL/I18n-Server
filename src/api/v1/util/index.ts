@@ -9,6 +9,8 @@ import { ControllerDeclare } from '../controller/controller';
 function routerResponseFormatter(res: Express.Response, responseData: ControllerDeclare.typicalResponse): void {
     const message = HttpStatusMessage.get(responseData.status);
 
+    res.customStatusCode = responseData.status;
+
     if (responseData.status > 600) {
         responseData.status = 400;
     }
@@ -24,7 +26,6 @@ async function validationErrorHandler(req: Express.Request): Promise<[boolean, s
     let result = '';
     const isError = !errors.isEmpty();
     if (isError) {
-        console.log("資料驗證錯誤", errors);
         result = Object.keys(errors.mapped())[0];
     }
     return [isError, result];

@@ -68,13 +68,13 @@ router.delete(langPath.WordsDelete, async (req, res, next): Promise<void> => {
 router.get(langPath.NativeLangGet, async (req, res, next) => {
     // let responseData = await langController.r_getNativeLangHandler();
     // if (responseData.status === HttpStatus.WARNING_NOT_EXIST_KEY) {
-    let responseData = await langController.getNativeLanguage();
+    let responseData = await langController.getNativeLanguageHandler();
     // }
     routerResponseFormatter(res, responseData);
 });
 
 router.put(langPath.NativeLangUpdate, async (req, res, next) => {
-    const responseData = await langController.updateNativeLang(req);
+    const responseData = await langController.updateNativeLangHandler(req);
     routerResponseFormatter(res, responseData);
 });
 

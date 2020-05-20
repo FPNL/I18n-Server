@@ -4,10 +4,10 @@ import * as Bcrypt from 'bcrypt';
 // Module
 import { HttpStatus } from '../../../package/httpStatus';
 import * as util from '../util';
-import * as userModel from '../model/user';
+import * as userModel from '../repository/user';
 import * as config from '../../../config';
 // Typing
-import { ModelDeclare } from '../model/model';
+import { ModelDeclare } from '../repository/model';
 
 async function checkUserExist(data) {
     const result = await userModel.countUsers(data);

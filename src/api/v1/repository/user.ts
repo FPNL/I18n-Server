@@ -127,13 +127,7 @@ async function findUser(data: { account: string; }) {
 
 function createUser(data: { account: string; password: string; nickname: string; }) {
     // return UserModel.create(data);
-    try {
-
-        return UserModel.insertMany(data);
-    } catch (error) {
-        console.log(123, error);
-
-    }
+    return UserModel.insertMany(data);
 }
 
 export { findUser, createUser, countUsers, UserModel };
