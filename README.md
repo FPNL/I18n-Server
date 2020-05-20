@@ -15,6 +15,7 @@
     TODO
     1. 建言 api
     2. WebSocket
+    3. E-tag
 -->
 
 ### 套件目錄
