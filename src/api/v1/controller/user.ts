@@ -67,8 +67,9 @@ async function loginHandler(req: Express.Request): Promise<[boolean, { id: strin
 async function registerHandler(req) {
     try {
         // 驗證 -> 符合格式 -> 確認資料庫有無資料 -> 資料格式化 密碼需要雜湊 -> 新增資料
-        if (!await userService.registerValidation(req)) {
-            return { result: false, status: HttpStatus.INVALID_PARAMS };
+        let [err, result] = await userService.registerValidation(req);
+        if (err) {
+            return { result: false, status: result };
         }
 
         const reqBodyData = req.body;

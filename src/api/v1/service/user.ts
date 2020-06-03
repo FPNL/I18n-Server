@@ -91,13 +91,13 @@ function validationErrorResponse(err: boolean, result: string): [boolean, number
         let errorCode: number;
         switch (result) {
             case 'account':
-                errorCode = HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
+                errorCode = HttpStatus.ERROR_ACCOUNT_FORMAT;
                 break;
             case 'password':
-                errorCode = HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
+                errorCode = HttpStatus.ERROR_PASSWORD_FORMAT;
                 break;
             case 'nickname':
-                errorCode = HttpStatus.ERROR_ALREADY_EXIST_LANGUAGE;
+                errorCode = HttpStatus.ERROR_NICKNAME_FORMAT;
                 break;
             default:
                 errorCode = 500;
