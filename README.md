@@ -11,12 +11,15 @@
     10. part of BDD
     11. ts 編譯問題
     12. CI/CD
-
-    TODO
-    1. 建言 api
-    2. WebSocket
-    3. E-tag
 -->
+
+## 特點
+
+1. 前後端分離
+2. 採 MVC pattern，以及 repository pattern
+3. 自訂 HttpCode 可幫助開發尋找錯誤
+4. 中間件採插件模式，大大解藕
+5. router 使用物件形式安排路徑，可參考 src/api/v1/routes/languages.ts:9
 
 ### 套件目錄
 
